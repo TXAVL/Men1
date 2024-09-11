@@ -1,7 +1,7 @@
 #!/bin/bash
 
-VERSION="1.0.0"
-SCRIPT_URL="https://txavl.github.io/Men1/menu.sh"
+VERSION="1.0.1"
+SCRIPT_URL="https://raw.githubusercontent.com/txavl/Men1/main/menu.sh"
 
 # Định nghĩa các mã màu ANSI
 RED='\033[0;31m'
@@ -11,21 +11,45 @@ BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
+# Danh sách các gói cần thiết
+REQUIRED_PACKAGES="curl nmap"
+
+# Hàm kiểm tra và cài đặt các gói cần thiết
+check_and_install_packages() {
+    echo -e "${YELLOW}Đang kiểm tra các gói cần thiết...${NC}"
+    for package in $REQUIRED_PACKAGES; do
+        if ! command -v $package &> /dev/null; then
+            echo -e "${RED}$package chưa được cài đặt. Đang cài đặt...${NC}"
+            pkg install -y $package
+        else
+            echo -e "${GREEN}$package đã được cài đặt.${NC}"
+        fi
+    done
+    echo -e "${GREEN}Tất cả các gói cần thiết đã được cài đặt.${NC}"
+}
+
 # Hàm kiểm tra cập nhật
 check_update() {
     echo -e "${YELLOW}Đang kiểm tra cập nhật...${NC}"
-    local latest_version=$(curl -s "$SCRIPT_URL" | grep "VERSION=" | cut -d'"' -f2)
-    if [[ "$latest_version" > "$VERSION" ]]; then
-        echo -e "${GREEN}Có phiên bản mới: $latest_version${NC}"
-        read -p "Bạn có muốn cập nhật không? (y/n): " choice
-        if [[ "$choice" == "y" || "$choice" == "Y" ]]; then
-            curl -L "$SCRIPT_URL" -o "$0"
-            echo -e "${GREEN}Đã cập nhật script. Vui lòng chạy lại.${NC}"
-            exit 0
+    local temp_file=$(mktemp)
+    if curl -s "$SCRIPT_URL" -o "$temp_file"; then
+        local latest_version=$(grep "VERSION=" "$temp_file" | cut -d'"' -f2)
+        if [[ "$latest_version" > "$VERSION" ]]; then
+            echo -e "${GREEN}Có phiên bản mới: $latest_version${NC}"
+            read -p "Bạn có muốn cập nhật không? (y/n): " choice
+            if [[ "$choice" == "y" || "$choice" == "Y" ]]; then
+                mv "$temp_file" "$0"
+                chmod +x "$0"
+                echo -e "${GREEN}Đã cập nhật script. Vui lòng chạy lại.${NC}"
+                exit 0
+            fi
+        else
+            echo -e "${GREEN}Bạn đang sử dụng phiên bản mới nhất.${NC}"
         fi
     else
-        echo -e "${GREEN}Bạn đang sử dụng phiên bản mới nhất.${NC}"
+        echo -e "${RED}Không thể kiểm tra cập nhật. Vui lòng thử lại sau.${NC}"
     fi
+    rm -f "$temp_file"
 }
 
 # Hàm hiển thị tiêu đề
@@ -138,6 +162,7 @@ show_system_info() {
 
 # Hàm chính
 main() {
+    check_and_install_packages
     check_update
     while true; do
         show_header
