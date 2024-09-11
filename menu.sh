@@ -95,7 +95,7 @@ check_update() {
 show_header() {
     clear
     echo -e "${RED}╔════════════════════════════════════════╗${NC}"
-    echo -e "${RED}║${YELLOW}           TXA Advanced Script         ${RED}║${NC}"
+    echo -e "${RED}║${YELLOW}           TXA Advanced Script        ${RED}║${NC}"
     echo -e "${RED}║${GREEN}        Copyright © 2024 TXA           ${RED}║${NC}"
     echo -e "${RED}║${BLUE}           Version: $VERSION            ${RED}║${NC}"
     echo -e "${RED}╚════════════════════════════════════════╝${NC}"
@@ -104,7 +104,7 @@ show_header() {
 
 # Hàm thông báo quyền hạn và yêu cầu xác nhận
 show_warning() {
-    echo -e "${RED}Sau khi cài đặt, mọi quyền hạn và tính năng của Termux sẽ thuộc về NinjaServerTermux.${NC}"
+    echo -e "${RED}Sau khi cài đặt, mọi quyền hạn và tính năng của Termux sẽ thuộc về TxaServer.${NC}"
     echo -e "${RED}Ví dụ như bạn không thể apt install bất kỳ cái gì, kể cả dpkg.${NC}"
     echo -e "${RED}Nếu bạn muốn quay về ban đầu, hãy cài đặt lại Termux.${NC}"
     echo
