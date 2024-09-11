@@ -5,6 +5,7 @@ SCRIPT_URL="https://txavl.github.io/Men1/menu.sh"
 KEY_FILE="$HOME/.txa_key"
 API_URL="https://key.txavideo.online/api/validate_key.php"
 USER_INFO_FILE="$HOME/.txa_user_info"
+VERSION_FILE="$HOME/.txa_version"
 
 # Định nghĩa các mã màu ANSI
 RED='\033[0;31m'
@@ -31,34 +32,26 @@ check_and_install_packages() {
     echo -e "${GREEN}Tất cả các gói cần thiết đã được cài đặt.${NC}"
 }
 
-# Hàm kiểm tra cập nhật
+# Hàm kiểm tra phiên bản và cập nhật nếu cần
 check_update() {
-    echo -e "${YELLOW}Đang kiểm tra cập nhật...${NC}"
     local temp_file=$(mktemp)
-    if curl -s "$SCRIPT_URL" -o "$temp_file"; then
-        local latest_version=$(grep "^VERSION=" "$temp_file" | cut -d'"' -f2)
-        if [[ -z "$latest_version" ]]; then
-            echo -e "${RED}Không thể xác định phiên bản mới từ server.${NC}"
-            rm -f "$temp_file"
-            return
-        fi
-        
-        if [[ "$latest_version" > "$VERSION" ]]; then
-            echo -e "${GREEN}Có phiên bản mới: $latest_version${NC}"
-            read -p "Bạn có muốn cập nhật không? (y/n): " choice
-            if [[ "$choice" == "y" || "$choice" == "Y" ]]; then
-                mv "$temp_file" "$0"
-                chmod +x "$0"
-                echo -e "${GREEN}Đã cập nhật script. Vui lòng chạy lại.${NC}"
-                exit 0
-            fi
-        else
-            echo -e "${GREEN}Bạn đang sử dụng phiên bản mới nhất.${NC}"
+    curl -s "$SCRIPT_URL" -o "$temp_file"
+    local latest_version=$(grep "VERSION=" "$temp_file" | cut -d'"' -f2)
+
+    if [[ "$latest_version" > "$VERSION" ]]; then
+        echo -e "${GREEN}Có phiên bản mới: $latest_version${NC}"
+        read -p "Bạn có muốn cập nhật không? (y/n): " choice
+        if [[ "$choice" == "y" || "$choice" == "Y" ]]; then
+            echo "$latest_version" > "$VERSION_FILE"
+            mv "$temp_file" "$0"
+            chmod +x "$0"
+            echo -e "${GREEN}Đã cập nhật script. Vui lòng chạy lại.${NC}"
+            exit 0
         fi
     else
-        echo -e "${RED}Không thể kiểm tra cập nhật. Vui lòng thử lại sau.${NC}"
+        echo -e "${GREEN}Bạn đang sử dụng phiên bản mới nhất.${NC}"
+        rm -f "$temp_file"
     fi
-    rm -f "$temp_file"
 }
 
 # Hàm hiển thị tiêu đề
@@ -245,8 +238,8 @@ auto_update_check() {
 
 # Hàm chính
 main() {
+show_warning
     check_and_install_packages
-    show_warning
     check_update
     
     # Chạy auto_update_check trong nền
