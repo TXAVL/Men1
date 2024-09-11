@@ -95,10 +95,10 @@ check_update() {
 show_header() {
     clear
     echo -e "${RED}╔════════════════════════════════════════╗${NC}"
-    echo -e "${RED}║${YELLOW}           TXA Advanced Script        ${RED}║${NC}"
-    echo -e "${RED}║${GREEN}        Copyright © 2024 TXA           ${RED}║${NC}"
-    echo -e "${RED}║${BLUE}           Version: $VERSION            ${RED}║${NC}"
-    echo -e "${RED}╚════════════════════════════════════════╝${NC}"
+    echo -e "${RED}║${YELLOW}           TXA Advanced Script         ${RED}║${NC}"
+    echo -e "${RED}║${GREEN}        Copyright © 2024 TXA            ${RED}║${NC}"
+    echo -e "${RED}║${BLUE}           Version: $VERSION             ${RED}║${NC}"
+    echo -e "${RED}╚═════════════════════════════════════════╝${NC}"
     echo
 }
 
