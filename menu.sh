@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="1.1.0"
+VERSION="1.1.3"
 SCRIPT_URL="https://txavl.github.io/Men1/menu.sh"
 KEY_FILE="$HOME/.txa_key"
 API_URL="https://key.txavideo.online/api/validate_key.php"
@@ -32,28 +32,65 @@ check_and_install_packages() {
     echo -e "${GREEN}Tất cả các gói cần thiết đã được cài đặt.${NC}"
 }
 
-# Hàm kiểm tra phiên bản và cập nhật nếu cần
-check_update() {
-    local temp_file=$(mktemp)
-    curl -s "$SCRIPT_URL" -o "$temp_file"
-    local latest_version=$(grep "VERSION=" "$temp_file" | cut -d'"' -f2)
-
-    if [[ "$latest_version" > "$VERSION" ]]; then
-        echo -e "${GREEN}Có phiên bản mới: $latest_version${NC}"
-        read -p "Bạn có muốn cập nhật không? (y/n): " choice
-        if [[ "$choice" == "y" || "$choice" == "Y" ]]; then
-            echo "$latest_version" > "$VERSION_FILE"
-            mv "$temp_file" "$0"
-            chmod +x "$0"
-            echo -e "${GREEN}Đã cập nhật script. Vui lòng chạy lại.${NC}"
-            exit 0
-        fi
+# Hàm so sánh phiên bản
+compare_versions() {
+    local ver1=$1
+    local ver2=$2
+    if [[ "$ver1" == "$ver2" ]]; then
+        return 0  # bằng nhau
+    elif [[ "$(printf '%s\n' "$ver1" "$ver2" | sort -V | head -n1)" == "$ver1" ]]; then
+        return 1  # ver1 nhỏ hơn ver2
     else
-        echo -e "${GREEN}Bạn đang sử dụng phiên bản mới nhất.${NC}"
-        rm -f "$temp_file"
+        return 2  # ver1 lớn hơn ver2
     fi
 }
 
+# Hàm kiểm tra cập nhật
+check_update() {
+    echo -e "${YELLOW}Đang kiểm tra cập nhật...${NC}"
+    local temp_file=$(mktemp)
+    
+    # Kiểm tra nếu đã có tệp phiên bản
+    if [ -f "$VERSION_FILE" ]; then
+        local current_version=$(cat "$VERSION_FILE")
+    else
+        local current_version="0.0.0"
+    fi
+    
+    if curl -s "$SCRIPT_URL" -o "$temp_file"; then
+        local latest_version=$(grep "^VERSION=" "$temp_file" | cut -d'"' -f2)
+        if [[ -z "$latest_version" ]]; then
+            echo -e "${RED}Không thể xác định phiên bản mới từ server.${NC}"
+            rm -f "$temp_file"
+            return
+        fi
+        
+        # So sánh phiên bản chính xác
+        compare_versions "$current_version" "$latest_version"
+        case $? in
+            1)
+                echo -e "${GREEN}Có phiên bản mới: $latest_version${NC}"
+                read -p "Bạn có muốn cập nhật không? (y/n): " choice
+                if [[ "$choice" == "y" || "$choice" == "Y" ]]; then
+                    mv "$temp_file" "$0"
+                    chmod +x "$0"
+                    echo "$latest_version" > "$VERSION_FILE"
+                    echo -e "${GREEN}Đã cập nhật script. Vui lòng chạy lại.${NC}"
+                    exit 0
+                fi
+                ;;
+            2)
+                echo -e "${GREEN}Bạn đang sử dụng phiên bản mới nhất.${NC}"
+                ;;
+            *)
+                echo -e "${RED}Có lỗi khi so sánh phiên bản.${NC}"
+                ;;
+        esac
+    else
+        echo -e "${RED}Không thể kiểm tra cập nhật. Vui lòng thử lại sau.${NC}"
+    fi
+    rm -f "$temp_file"
+}
 # Hàm hiển thị tiêu đề
 show_header() {
     clear
