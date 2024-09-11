@@ -104,7 +104,7 @@ show_header() {
 
 # Hàm thông báo quyền hạn và yêu cầu xác nhận
 show_warning() {
-    echo -e "${RED}Sau khi cài đặt, mọi quyền hạn và tính năng của Termux sẽ thuộc về TxaServer.${NC}"
+    echo -e "${RED}Sau khi cài đặt v$VERSION , mọi quyền hạn và tính năng của Termux sẽ thuộc về TxaServer.${NC}"
     echo -e "${RED}Nếu bạn muốn quay về ban đầu, hãy cài đặt lại Termux.${NC}"
     echo
     read -p "Bạn có muốn tiếp tục? [Y/N]: " choice
