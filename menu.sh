@@ -143,8 +143,11 @@ is_key_valid() {
     if [ -f "$KEY_FILE" ]; then
         local key=$(cat "$KEY_FILE")
         local response=$(curl -s -X POST -d "key=$key" "$API_URL")
-        if [ "$(echo "$response" | jq -r '.valid')" == "true" ]; then
+        # Kiểm tra phản hồi từ API
+        if echo "$response" | jq -e '.valid == true' > /dev/null 2>&1; then
             return 0  # Key hợp lệ
+        else
+            return 1  # Key không hợp lệ
         fi
     fi
     return 1  # Key không hợp lệ hoặc không tồn tại
@@ -153,6 +156,10 @@ is_key_valid() {
 # Hàm nhập key
 input_key() {
     read -p "Nhập key của bạn: " key
+    if [[ -z "$key" ]]; then
+        echo -e "${RED}Key không được để trống. Vui lòng thử lại.${NC}"
+        return
+    fi
     echo "$key" > "$KEY_FILE"
     if is_key_valid; then
         echo -e "${GREEN}Key hợp lệ. Bạn đã có quyền truy cập vào các tính năng nâng cao.${NC}"
