@@ -36,7 +36,13 @@ check_update() {
     echo -e "${YELLOW}Đang kiểm tra cập nhật...${NC}"
     local temp_file=$(mktemp)
     if curl -s "$SCRIPT_URL" -o "$temp_file"; then
-        local latest_version=$(grep "VERSION=" "$temp_file" | cut -d'"' -f2)
+        local latest_version=$(grep "^VERSION=" "$temp_file" | cut -d'"' -f2)
+        if [[ -z "$latest_version" ]]; then
+            echo -e "${RED}Không thể xác định phiên bản mới từ server.${NC}"
+            rm -f "$temp_file"
+            return
+        fi
+        
         if [[ "$latest_version" > "$VERSION" ]]; then
             echo -e "${GREEN}Có phiên bản mới: $latest_version${NC}"
             read -p "Bạn có muốn cập nhật không? (y/n): " choice
@@ -68,7 +74,7 @@ show_header() {
 
 # Hàm thông báo quyền hạn và yêu cầu xác nhận
 show_warning() {
-    echo -e "${RED}Sau khi cài đặt, mọi quyền hạn và tính năng của Termux sẽ thuộc về TxaTer.${NC}"
+    echo -e "${RED}Sau khi cài đặt, mọi quyền hạn và tính năng của Termux sẽ thuộc về NinjaServerTermux.${NC}"
     echo -e "${RED}Ví dụ như bạn không thể apt install bất kỳ cái gì, kể cả dpkg.${NC}"
     echo -e "${RED}Nếu bạn muốn quay về ban đầu, hãy cài đặt lại Termux.${NC}"
     echo
@@ -83,7 +89,8 @@ show_warning() {
 show_main_menu() {
     echo -e "${CYAN}Menu Chính:${NC}"
     echo -e "${BLUE}1. Open Menu${NC}"
-    echo -e "${BLUE}2. Exit${NC}"
+    echo -e "${BLUE}2. Nhập Key${NC}"
+    echo -e "${BLUE}3. Exit${NC}"
     echo
 }
 
@@ -231,7 +238,7 @@ network_analysis() {
 # Hàm chạy trong nền để tự động kiểm tra cập nhật
 auto_update_check() {
     while true; do
-        sleep 3600  # Kiểm tra mỗi giờ
+        sleep 300  # Kiểm tra mỗi giờ
         check_update
     done
 }
@@ -252,9 +259,11 @@ main() {
         read -p "Nhập lựa chọn của bạn: " choice
         case $choice in
             1) handle_submenu ;;
-            2) echo -e "${GREEN}Cảm ơn bạn đã sử dụng script. Tạm biệt!${NC}"; exit 0 ;;
+            2) input_key ;;
+            3) echo -e "${GREEN}Cảm ơn bạn đã sử dụng script. Tạm biệt!${NC}"; exit 0 ;;
             *) echo -e "${RED}Lựa chọn không hợp lệ. Vui lòng thử lại.${NC}" ;;
         esac
+        read -p "Nhấn Enter để tiếp tục..."
     done
 }
 
