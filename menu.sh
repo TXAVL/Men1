@@ -105,7 +105,6 @@ show_header() {
 # Hàm thông báo quyền hạn và yêu cầu xác nhận
 show_warning() {
     echo -e "${RED}Sau khi cài đặt, mọi quyền hạn và tính năng của Termux sẽ thuộc về TxaServer.${NC}"
-    echo -e "${RED}Ví dụ như bạn không thể apt install bất kỳ cái gì, kể cả dpkg.${NC}"
     echo -e "${RED}Nếu bạn muốn quay về ban đầu, hãy cài đặt lại Termux.${NC}"
     echo
     read -p "Bạn có muốn tiếp tục? [Y/N]: " choice
@@ -155,6 +154,8 @@ is_key_valid() {
 
 # Hàm nhập key
 input_key() {
+    clear
+    show_header
     read -p "Nhập key của bạn: " key
     if [[ -z "$key" ]]; then
         echo -e "${RED}Key không được để trống. Vui lòng thử lại.${NC}"
@@ -184,6 +185,8 @@ update_user_info() {
 
 # Hàm hiển thị thông tin người dùng
 show_user_info() {
+    clear
+    show_header
     if [ -f "$USER_INFO_FILE" ]; then
         echo -e "${YELLOW}Thông tin người dùng:${NC}"
         cat "$USER_INFO_FILE"
