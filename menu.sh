@@ -54,13 +54,28 @@ handle_choice() {
             ;;
     esac
     echo
-    read -p "Nhấn Enter để tiếp tục..."
 }
 
-# Vòng lặp chính của script
-while true; do
+# Hàm chạy tất cả các tùy chọn
+run_all_options() {
     show_header
-    show_menu
-    read -p "Nhập lựa chọn của bạn: " choice
-    handle_choice $choice
-done
+    handle_choice 1
+    handle_choice 2
+    handle_choice 3
+    echo -e "${GREEN}Đã chạy tất cả các tùy chọn. Tạm biệt!${NC}"
+}
+
+# Kiểm tra xem script có đang chạy trong pipe hay không
+if [ -t 1 ]; then
+    # Chế độ tương tác
+    while true; do
+        show_header
+        show_menu
+        read -p "Nhập lựa chọn của bạn: " choice
+        handle_choice $choice
+        read -p "Nhấn Enter để tiếp tục..."
+    done
+else
+    # Chế độ không tương tác (chạy qua curl)
+    run_all_options
+fi
