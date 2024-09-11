@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="1.1.3"
+VERSION="1.1.5"
 SCRIPT_URL="https://txavl.github.io/Men1/menu.sh"
 KEY_FILE="$HOME/.txa_key"
 API_URL="https://key.txavideo.online/api/validate_key.php"
