@@ -7,7 +7,7 @@ VERSION_FILE="$HOME/.txa_version"
 SCRIPT_URL="https://txavl.github.io/Men1/menu1.sh"
 
 # Phiên bản hiện tại của script
-VERSION="1.1.0"
+VERSION="1.0.0"
 
 # Màu sắc cho thông báo
 RED='\033[0;31m'
