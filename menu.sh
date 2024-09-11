@@ -1,9 +1,12 @@
+
 #!/bin/bash
 
-VERSION="1.0.2"
-SCRIPT_URL="https://raw.githubusercontent.com/txavl/Men1/main/menu.sh"
+VERSION="1.1.0"
+#SCRIPT_URL="https://raw.githubusercontent.com/txavl/Men1/main/menu.sh"
+SCRIPT_URL="https://txavl.github.io/Men1/menu.sh"
 KEY_FILE="$HOME/.txa_key"
-API_URL="https://your-api-url.com/validate_key.php"  # Thay thế bằng URL API thực tế của bạn
+API_URL="https://key.txavideo.online/api/validate_key.php"
+USER_INFO_FILE="$HOME/.txa_user_info"
 
 # Định nghĩa các mã màu ANSI
 RED='\033[0;31m'
@@ -82,7 +85,8 @@ show_submenu() {
     if is_key_valid; then
         echo -e "${BLUE}4. Advanced Menu${NC}"
     fi
-    echo -e "${BLUE}5. Back to Main Menu${NC}"
+    echo -e "${BLUE}5. User Info${NC}"
+    echo -e "${BLUE}6. Back to Main Menu${NC}"
     echo
 }
 
@@ -90,7 +94,6 @@ show_submenu() {
 is_key_valid() {
     if [ -f "$KEY_FILE" ]; then
         local key=$(cat "$KEY_FILE")
-        # Gửi key đến API để xác thực
         local response=$(curl -s -X POST -d "key=$key" "$API_URL")
         if [ "$(echo "$response" | jq -r '.valid')" == "true" ]; then
             return 0  # Key hợp lệ
@@ -105,9 +108,32 @@ input_key() {
     echo "$key" > "$KEY_FILE"
     if is_key_valid; then
         echo -e "${GREEN}Key hợp lệ. Bạn đã có quyền truy cập vào các tính năng nâng cao.${NC}"
+        update_user_info
     else
         echo -e "${RED}Key không hợp lệ. Vui lòng thử lại.${NC}"
         rm -f "$KEY_FILE"
+    fi
+}
+
+# Hàm cập nhật thông tin người dùng
+update_user_info() {
+    if [ -f "$KEY_FILE" ]; then
+        local key=$(cat "$KEY_FILE")
+        local response=$(curl -s -X GET "$API_URL?action=get_user_info&key=$key")
+        echo "$response" > "$USER_INFO_FILE"
+        echo -e "${GREEN}Thông tin người dùng đã được cập nhật.${NC}"
+    else
+        echo -e "${RED}Không tìm thấy key. Vui lòng nhập key trước.${NC}"
+    fi
+}
+
+# Hàm hiển thị thông tin người dùng
+show_user_info() {
+    if [ -f "$USER_INFO_FILE" ]; then
+        echo -e "${YELLOW}Thông tin người dùng:${NC}"
+        cat "$USER_INFO_FILE"
+    else
+        echo -e "${RED}Không có thông tin người dùng. Vui lòng cập nhật.${NC}"
     fi
 }
 
@@ -130,7 +156,8 @@ handle_submenu() {
                     input_key
                 fi
                 ;;
-            5) return ;;
+            5) show_user_info ;;
+            6) return ;;
             *) echo -e "${RED}Lựa chọn không hợp lệ. Vui lòng thử lại.${NC}" ;;
         esac
         read -p "Nhấn Enter để tiếp tục..."
@@ -163,18 +190,31 @@ check_ip() {
 # Hàm menu nâng cao (chỉ hiển thị khi có key hợp lệ)
 advanced_menu() {
     echo -e "${CYAN}Menu Nâng Cao:${NC}"
-    echo -e "${BLUE}1. Tính năng nâng cao 1${NC}"
-    echo -e "${BLUE}2. Tính năng nâng cao 2${NC}"
+    echo -e "${BLUE}1. Quét cổng${NC}"
+    echo -e "${BLUE}2. Phân tích lưu lượng mạng${NC}"
     echo -e "${BLUE}3. Quay lại${NC}"
     
     local choice
     read -p "Nhập lựa chọn của bạn: " choice
     case $choice in
-        1) echo "Đang thực hiện tính năng nâng cao 1..." ;;
-        2) echo "Đang thực hiện tính năng nâng cao 2..." ;;
+        1) port_scan ;;
+        2) network_analysis ;;
         3) return ;;
         *) echo -e "${RED}Lựa chọn không hợp lệ. Vui lòng thử lại.${NC}" ;;
     esac
+}
+
+# Hàm quét cổng
+port_scan() {
+    read -p "Nhập địa chỉ IP để quét cổng: " ip
+    nmap $ip
+}
+
+# Hàm phân tích lưu lượng mạng
+network_analysis() {
+    echo "Đang phân tích lưu lượng mạng..."
+    # Thêm logic phân tích lưu lượng mạng ở đây
+    echo "Chức năng này đang được phát triển."
 }
 
 # Hàm chạy trong nền để tự động kiểm tra cập nhật
