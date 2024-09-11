@@ -1,8 +1,6 @@
-
 #!/bin/bash
 
 VERSION="1.1.0"
-#SCRIPT_URL="https://raw.githubusercontent.com/txavl/Men1/main/menu.sh"
 SCRIPT_URL="https://txavl.github.io/Men1/menu.sh"
 KEY_FILE="$HOME/.txa_key"
 API_URL="https://key.txavideo.online/api/validate_key.php"
@@ -66,6 +64,19 @@ show_header() {
     echo -e "${RED}║${BLUE}           Version: $VERSION            ${RED}║${NC}"
     echo -e "${RED}╚════════════════════════════════════════╝${NC}"
     echo
+}
+
+# Hàm thông báo quyền hạn và yêu cầu xác nhận
+show_warning() {
+    echo -e "${RED}Sau khi cài đặt, mọi quyền hạn và tính năng của Termux sẽ thuộc về TxaTer.${NC}"
+    echo -e "${RED}Ví dụ như bạn không thể apt install bất kỳ cái gì, kể cả dpkg.${NC}"
+    echo -e "${RED}Nếu bạn muốn quay về ban đầu, hãy cài đặt lại Termux.${NC}"
+    echo
+    read -p "Bạn có muốn tiếp tục? [Y/N]: " choice
+    if [[ "$choice" != "y" && "$choice" != "Y" ]]; then
+        echo -e "${RED}Cài đặt đã bị hủy.${NC}"
+        exit 1
+    fi
 }
 
 # Hàm hiển thị menu chính
@@ -228,6 +239,7 @@ auto_update_check() {
 # Hàm chính
 main() {
     check_and_install_packages
+    show_warning
     check_update
     
     # Chạy auto_update_check trong nền
