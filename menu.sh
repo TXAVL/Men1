@@ -1,7 +1,9 @@
 #!/bin/bash
 
-VERSION="1.0.1"
+VERSION="1.0.2"
 SCRIPT_URL="https://raw.githubusercontent.com/txavl/Men1/main/menu.sh"
+KEY_FILE="$HOME/.txa_key"
+API_URL="https://your-api-url.com/validate_key.php"  # Thay thế bằng URL API thực tế của bạn
 
 # Định nghĩa các mã màu ANSI
 RED='\033[0;31m'
@@ -12,7 +14,7 @@ CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 # Danh sách các gói cần thiết
-REQUIRED_PACKAGES="curl nmap"
+REQUIRED_PACKAGES="curl nmap jq"
 
 # Hàm kiểm tra và cài đặt các gói cần thiết
 check_and_install_packages() {
@@ -66,81 +68,69 @@ show_header() {
 # Hàm hiển thị menu chính
 show_main_menu() {
     echo -e "${CYAN}Menu Chính:${NC}"
-    echo -e "${BLUE}1. Thông tin hệ thống${NC}"
-    echo -e "${BLUE}2. Công cụ mạng${NC}"
-    echo -e "${BLUE}3. Quản lý tệp tin${NC}"
-    echo -e "${BLUE}4. Kiểm tra cập nhật${NC}"
-    echo -e "${BLUE}5. Thoát${NC}"
+    echo -e "${BLUE}1. Open Menu${NC}"
+    echo -e "${BLUE}2. Exit${NC}"
     echo
 }
 
-# Hàm hiển thị menu con cho công cụ mạng
-show_network_menu() {
-    echo -e "${CYAN}Menu Công cụ Mạng:${NC}"
-    echo -e "${BLUE}1. Kiểm tra kết nối mạng${NC}"
-    echo -e "${BLUE}2. Hiển thị địa chỉ IP${NC}"
-    echo -e "${BLUE}3. Quét cổng${NC}"
-    echo -e "${BLUE}4. Quay lại menu chính${NC}"
+# Hàm hiển thị submenu
+show_submenu() {
+    echo -e "${CYAN}Submenu:${NC}"
+    echo -e "${BLUE}1. System Info${NC}"
+    echo -e "${BLUE}2. Ping IP${NC}"
+    echo -e "${BLUE}3. Check IP${NC}"
+    if is_key_valid; then
+        echo -e "${BLUE}4. Advanced Menu${NC}"
+    fi
+    echo -e "${BLUE}5. Back to Main Menu${NC}"
     echo
 }
 
-# Hàm hiển thị menu con cho quản lý tệp tin
-show_file_menu() {
-    echo -e "${CYAN}Menu Quản lý Tệp tin:${NC}"
-    echo -e "${BLUE}1. Liệt kê tệp tin${NC}"
-    echo -e "${BLUE}2. Tạo thư mục mới${NC}"
-    echo -e "${BLUE}3. Xóa tệp tin/thư mục${NC}"
-    echo -e "${BLUE}4. Quay lại menu chính${NC}"
-    echo
+# Hàm kiểm tra key
+is_key_valid() {
+    if [ -f "$KEY_FILE" ]; then
+        local key=$(cat "$KEY_FILE")
+        # Gửi key đến API để xác thực
+        local response=$(curl -s -X POST -d "key=$key" "$API_URL")
+        if [ "$(echo "$response" | jq -r '.valid')" == "true" ]; then
+            return 0  # Key hợp lệ
+        fi
+    fi
+    return 1  # Key không hợp lệ hoặc không tồn tại
 }
 
-# Hàm xử lý menu chính
-handle_main_menu() {
-    local choice
-    read -p "Nhập lựa chọn của bạn: " choice
-    case $choice in
-        1) show_system_info ;;
-        2) network_menu ;;
-        3) file_menu ;;
-        4) check_update ;;
-        5) echo -e "${GREEN}Cảm ơn bạn đã sử dụng script. Tạm biệt!${NC}"; exit 0 ;;
-        *) echo -e "${RED}Lựa chọn không hợp lệ. Vui lòng thử lại.${NC}" ;;
-    esac
+# Hàm nhập key
+input_key() {
+    read -p "Nhập key của bạn: " key
+    echo "$key" > "$KEY_FILE"
+    if is_key_valid; then
+        echo -e "${GREEN}Key hợp lệ. Bạn đã có quyền truy cập vào các tính năng nâng cao.${NC}"
+    else
+        echo -e "${RED}Key không hợp lệ. Vui lòng thử lại.${NC}"
+        rm -f "$KEY_FILE"
+    fi
 }
 
-# Hàm xử lý menu công cụ mạng
-network_menu() {
+# Hàm xử lý submenu
+handle_submenu() {
     while true; do
         show_header
-        show_network_menu
+        show_submenu
         local choice
         read -p "Nhập lựa chọn của bạn: " choice
         case $choice in
-            1) ping -c 4 google.com ;;
-            2) curl ifconfig.me ;;
-            3) read -p "Nhập địa chỉ IP để quét: " ip
-               nmap $ip ;;
-            4) return ;;
-            *) echo -e "${RED}Lựa chọn không hợp lệ. Vui lòng thử lại.${NC}" ;;
-        esac
-        read -p "Nhấn Enter để tiếp tục..."
-    done
-}
-
-# Hàm xử lý menu quản lý tệp tin
-file_menu() {
-    while true; do
-        show_header
-        show_file_menu
-        local choice
-        read -p "Nhập lựa chọn của bạn: " choice
-        case $choice in
-            1) ls -la ;;
-            2) read -p "Nhập tên thư mục mới: " dirname
-               mkdir -p $dirname ;;
-            3) read -p "Nhập tên tệp tin/thư mục cần xóa: " filename
-               rm -ri $filename ;;
-            4) return ;;
+            1) show_system_info ;;
+            2) ping_ip ;;
+            3) check_ip ;;
+            4) 
+                if is_key_valid; then
+                    advanced_menu
+                else
+                    echo -e "${RED}Bạn cần nhập key hợp lệ để truy cập menu nâng cao.${NC}"
+                    input_key
+                fi
+                ;;
+            5) return ;;
             *) echo -e "${RED}Lựa chọn không hợp lệ. Vui lòng thử lại.${NC}" ;;
         esac
         read -p "Nhấn Enter để tiếp tục..."
@@ -157,17 +147,62 @@ show_system_info() {
     echo "CPU: $(lscpu | grep 'Model name' | cut -f 2 -d ":")"
     echo "Memory: $(free -h | awk '/^Mem:/ {print $2}')"
     echo "Disk Usage: $(df -h / | awk '/\// {print $(NF-1)}')"
-    read -p "Nhấn Enter để tiếp tục..."
+}
+
+# Hàm ping IP
+ping_ip() {
+    read -p "Nhập địa chỉ IP để ping: " ip
+    ping -c 4 $ip
+}
+
+# Hàm kiểm tra IP
+check_ip() {
+    echo "Địa chỉ IP của bạn là: $(curl -s ifconfig.me)"
+}
+
+# Hàm menu nâng cao (chỉ hiển thị khi có key hợp lệ)
+advanced_menu() {
+    echo -e "${CYAN}Menu Nâng Cao:${NC}"
+    echo -e "${BLUE}1. Tính năng nâng cao 1${NC}"
+    echo -e "${BLUE}2. Tính năng nâng cao 2${NC}"
+    echo -e "${BLUE}3. Quay lại${NC}"
+    
+    local choice
+    read -p "Nhập lựa chọn của bạn: " choice
+    case $choice in
+        1) echo "Đang thực hiện tính năng nâng cao 1..." ;;
+        2) echo "Đang thực hiện tính năng nâng cao 2..." ;;
+        3) return ;;
+        *) echo -e "${RED}Lựa chọn không hợp lệ. Vui lòng thử lại.${NC}" ;;
+    esac
+}
+
+# Hàm chạy trong nền để tự động kiểm tra cập nhật
+auto_update_check() {
+    while true; do
+        sleep 3600  # Kiểm tra mỗi giờ
+        check_update
+    done
 }
 
 # Hàm chính
 main() {
     check_and_install_packages
     check_update
+    
+    # Chạy auto_update_check trong nền
+    auto_update_check &
+    
     while true; do
         show_header
         show_main_menu
-        handle_main_menu
+        local choice
+        read -p "Nhập lựa chọn của bạn: " choice
+        case $choice in
+            1) handle_submenu ;;
+            2) echo -e "${GREEN}Cảm ơn bạn đã sử dụng script. Tạm biệt!${NC}"; exit 0 ;;
+            *) echo -e "${RED}Lựa chọn không hợp lệ. Vui lòng thử lại.${NC}" ;;
+        esac
     done
 }
 
