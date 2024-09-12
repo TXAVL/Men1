@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="1.2.1"
+VERSION="1.2.2"
 SCRIPT_URL="https://txavl.github.io/Men1/menu.sh"
 KEY_FILE="$HOME/.txa_key"
 API_URL="https://key.txavideo.online/api/validate_key.php"
@@ -35,7 +35,7 @@ show_warning() {
     if [ -f "$WARNING_ACCEPTED_FILE" ]; then
         return 0  # Warning already accepted, proceed
     fi
-    
+
     show_header
     echo -e "${RED}WARNING:${NC}"
     echo -e "${YELLOW}After installing v$VERSION, all Termux permissions and features will belong to TxaServer.${NC}"
@@ -44,10 +44,13 @@ show_warning() {
     echo -e "${CYAN}1. Accept and continue${NC}"
     echo -e "${CYAN}2. Decline and exit${NC}"
     echo
-    
+
+    # Pause to ensure user sees the warning
+    sleep 2
+
     # Prompt for user input
     read -r -p "Enter your choice (1 or 2): " choice
-    
+
     # Handle user input
     case "$choice" in
         1)
