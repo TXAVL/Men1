@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="1.2.6"
+VERSION="1.2.7"
 SCRIPT_URL="https://txavl.github.io/Men1/menu.sh"
 KEY_FILE="$HOME/.txa_key"
 API_URL="https://key.txavideo.online/api/validate_key.php"
@@ -116,8 +116,7 @@ show_header() {
 
 # Hàm thông báo quyền hạn và yêu cầu xác nhận
 show_warning() {
-    echo -e "${RED}Sau khi cài đặt, mọi quyền hạn và tính năng của Termux sẽ thuộc về NinjaServerTermux.${NC}"
-    echo -e "${RED}Ví dụ như bạn không thể apt install bất kỳ cái gì, kể cả dpkg.${NC}"
+    echo -e "${RED}Sau khi cài đặt v$VERSION, mọi quyền hạn và tính năng của Termux sẽ thuộc về TXAAPP.${NC}"
     echo -e "${RED}Nếu bạn muốn quay về ban đầu, hãy cài đặt lại Termux.${NC}"
     echo
     read -p "Bạn có muốn tiếp tục? [Y/N]: " choice
