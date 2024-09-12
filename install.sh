@@ -18,7 +18,7 @@ check_system_requirements() {
     echo -e "${BLUE}Đang kiểm tra yêu cầu hệ thống...${NC}"
     
     # Kiểm tra RAM
-    check_ram
+   # check_ram
 
     # Kiểm tra dung lượng trống
     check_free_space
