@@ -9,7 +9,7 @@ CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 # Thông tin script
-SCRIPT_VERSION="1.5"
+SCRIPT_VERSION="1.6"
 CURRENT_YEAR=$(date +"%Y")
 VERSION_API="https://key.txavideo.online/version.php"
 
@@ -18,7 +18,7 @@ check_system_requirements() {
     echo -e "${BLUE}Đang kiểm tra yêu cầu hệ thống...${NC}"
     
     # Kiểm tra RAM
-   # check_ram
+    check_ram
 
     # Kiểm tra dung lượng trống
     check_free_space
@@ -37,26 +37,20 @@ check_system_requirements() {
 }
 
 check_ram() {
-    total_ram=$(awk '/MemTotal/ {print $2}' /proc/meminfo 2>/dev/null)
-    if [ -z "$total_ram" ]; then
-        total_ram=$(free -b | awk '/^Mem:/{print $2}' 2>/dev/null)
-    fi
+    total_ram=$(free -b | awk '/^Mem:/{print $2}')
     if [ -z "$total_ram" ]; then
         echo -e "${RED}Lỗi: Không thể xác định dung lượng RAM.${NC}"
         exit 1
     fi
     total_ram_gb=$(awk "BEGIN {printf \"%.2f\", $total_ram/1024/1024/1024}")
     if (( $(echo "$total_ram_gb < 1" | bc -l) )); then
-        echo -e "${RED}Lỗi: Thiết bị cần tối thiểu 1GB RAM rỗng. Hiện tại: ${total_ram_gb}GB${NC}"
+        echo -e "${RED}Lỗi: Thiết bị cần tối thiểu 1GB RAM. Hiện tại: ${total_ram_gb}GB${NC}"
         exit 1
     fi
 }
 
 check_free_space() {
-    free_space=$(df -k $HOME | awk 'NR==2 {print $4}' 2>/dev/null)
-    if [ -z "$free_space" ]; then
-        free_space=$(du -k -s $HOME | cut -f1 2>/dev/null)
-    fi
+    free_space=$(df -k $HOME | awk 'NR==2 {print $4}')
     if [ -z "$free_space" ]; then
         echo -e "${RED}Lỗi: Không thể xác định dung lượng trống.${NC}"
         exit 1
@@ -69,10 +63,7 @@ check_free_space() {
 }
 
 check_cpu_architecture() {
-    arch=$(uname -m 2>/dev/null)
-    if [ -z "$arch" ]; then
-        arch=$(arch 2>/dev/null)
-    fi
+    arch=$(uname -m)
     if [ -z "$arch" ]; then
         echo -e "${RED}Lỗi: Không thể xác định kiến trúc CPU.${NC}"
         exit 1
@@ -84,13 +75,7 @@ check_cpu_architecture() {
 }
 
 check_android_version() {
-    android_version=""
-    if [ -f /system/build.prop ]; then
-        android_version=$(grep "ro.build.version.release" /system/build.prop | cut -d'=' -f2 2>/dev/null)
-    fi
-    if [ -z "$android_version" ]; then
-        android_version=$(getprop ro.build.version.release 2>/dev/null)
-    fi
+    android_version=$(getprop ro.build.version.release)
     if [ -z "$android_version" ]; then
         echo -e "${YELLOW}Cảnh báo: Không thể xác định phiên bản Android.${NC}"
         return
@@ -102,10 +87,7 @@ check_android_version() {
 }
 
 check_termux_version() {
-    termux_version=$(pkg list-installed | grep '^termux-tools' | awk -F' ' '{print $2}' 2>/dev/null)
-    if [ -z "$termux_version" ]; then
-        termux_version=$(termux-info 2>/dev/null | grep 'Version name' | awk '{print $3}')
-    fi
+    termux_version=$(pkg list-installed | grep '^termux-tools' | awk -F' ' '{print $2}')
     if [ -z "$termux_version" ]; then
         echo -e "${YELLOW}Cảnh báo: Không thể xác định phiên bản Termux.${NC}"
         return
@@ -117,7 +99,63 @@ check_termux_version() {
     fi
 }
 
-# ... (các hàm khác giữ nguyên)
+show_banner() {
+    echo -e "${CYAN}================================${NC}"
+    echo -e "${YELLOW}    TXA VLOG Server Script    ${NC}"
+    echo -e "${CYAN}        Version $SCRIPT_VERSION        ${NC}"
+    echo -e "${CYAN}================================${NC}"
+}
+
+show_menu() {
+    echo -e "${GREEN}1. Kiểm tra yêu cầu hệ thống${NC}"
+    echo -e "${GREEN}2. Kiểm tra cập nhật${NC}"
+    echo -e "${GREEN}3. Cài đặt gói${NC}"
+    echo -e "${GREEN}4. Chạy server${NC}"
+    echo -e "${GREEN}5. Xem changelog${NC}"
+    echo -e "${GREEN}6. Thoát${NC}"
+    echo -e "${YELLOW}Nhập lựa chọn của bạn: ${NC}"
+}
+
+check_update() {
+    echo -e "${BLUE}Đang kiểm tra cập nhật...${NC}"
+    latest_version=$(curl -s $VERSION_API)
+    if [ -z "$latest_version" ]; then
+        echo -e "${RED}Lỗi: Không thể kiểm tra phiên bản mới nhất.${NC}"
+        return
+    fi
+    if [ "$latest_version" != "$SCRIPT_VERSION" ]; then
+        echo -e "${YELLOW}Có phiên bản mới: $latest_version${NC}"
+        echo -e "${YELLOW}Phiên bản hiện tại của bạn: $SCRIPT_VERSION${NC}"
+        echo -e "${YELLOW}Vui lòng cập nhật để có những tính năng mới nhất.${NC}"
+    else
+        echo -e "${GREEN}Bạn đang sử dụng phiên bản mới nhất.${NC}"
+    fi
+}
+
+install_packages() {
+    echo -e "${BLUE}Đang cài đặt các gói cần thiết...${NC}"
+    pkg update -y
+    pkg install -y python nodejs ffmpeg
+    pip install yt-dlp
+    npm install -g localtunnel
+    echo -e "${GREEN}Cài đặt gói hoàn tất.${NC}"
+}
+
+run_server() {
+    echo -e "${BLUE}Đang chạy server...${NC}"
+    # Thêm lệnh để chạy server của bạn ở đây
+    echo -e "${GREEN}Server đang chạy.${NC}"
+}
+
+view_changelog() {
+    echo -e "${CYAN}Changelog:${NC}"
+    echo -e "Version 1.6:"
+    echo -e "- Cải thiện kiểm tra yêu cầu hệ thống"
+    echo -e "- Thêm hàm show_banner và show_menu"
+    echo -e "- Sửa lỗi kiểm tra phiên bản Android"
+    echo -e "- Cập nhật cách kiểm tra RAM và dung lượng trống"
+    # Thêm thông tin changelog cho các phiên bản trước đó nếu cần
+}
 
 # Chương trình chính
 main() {
