@@ -117,6 +117,8 @@ show_menu() {
 }
 
 check_update() {
+    clear
+    show_banner
     echo -e "${BLUE}Đang kiểm tra cập nhật...${NC}"
     latest_version=$(curl -s $VERSION_API)
     if [ -z "$latest_version" ]; then
@@ -133,6 +135,8 @@ check_update() {
 }
 
 install_packages() {
+    clear
+    show_banner
     echo -e "${BLUE}Đang cài đặt các gói cần thiết...${NC}"
     pkg update -y -q
     pkg install -y -q python nodejs ffmpeg
@@ -161,6 +165,7 @@ view_changelog() {
 
 # Chương trình chính
 main() {
+    clear
     while true; do
         show_banner
         show_menu
