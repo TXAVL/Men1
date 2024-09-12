@@ -46,8 +46,8 @@ check_ram() {
         exit 1
     fi
     total_ram_gb=$(awk "BEGIN {printf \"%.2f\", $total_ram/1024/1024/1024}")
-    if (( $(echo "$total_ram_gb < 2" | bc -l) )); then
-        echo -e "${RED}Lỗi: Thiết bị cần tối thiểu 2GB RAM. Hiện tại: ${total_ram_gb}GB${NC}"
+    if (( $(echo "$total_ram_gb < 1" | bc -l) )); then
+        echo -e "${RED}Lỗi: Thiết bị cần tối thiểu 1GB RAM rỗng. Hiện tại: ${total_ram_gb}GB${NC}"
         exit 1
     fi
 }
