@@ -164,15 +164,64 @@ install_packages() {
     clear
     show_banner
     echo -e "${BLUE}Đang cài đặt các gói cần thiết...${NC}"
+    
+    # Cập nhật các gói
     pkg update -y -q
-    pkg install -y -q python nodejs ffmpeg
-    pip install -q yt-dlp
-    npm install -g localtunnel
+    
+    # Cài đặt Python
+    if ! command -v python &> /dev/null; then
+        echo -e "${YELLOW}Đang cài đặt Python...${NC}"
+        pkg install -y python
+    fi
+    
+    # Cài đặt Node.js
+    if ! command -v node &> /dev/null; then
+        echo -e "${YELLOW}Đang cài đặt Node.js...${NC}"
+        pkg install -y nodejs
+    fi
+    
+    # Cài đặt ffmpeg
+    if ! command -v ffmpeg &> /dev/null; then
+        echo -e "${YELLOW}Đang cài đặt ffmpeg...${NC}"
+        pkg install -y ffmpeg
+    fi
+    
+    # Cài đặt yt-dlp
+    if ! command -v yt-dlp &> /dev/null; then
+        echo -e "${YELLOW}Đang cài đặt yt-dlp...${NC}"
+        pip install yt-dlp
+    fi
+    
+    # Cài đặt localtunnel
+    if ! command -v lt &> /dev/null; then
+        echo -e "${YELLOW}Đang cài đặt localtunnel...${NC}"
+        npm install -g localtunnel
+    fi
+    
     echo -e "${GREEN}Cài đặt gói hoàn tất.${NC}"
+    
+    # Thêm đường dẫn vào PATH nếu cần
+    if [[ ! "$PATH" =~ "$HOME/.local/bin" ]]; then
+        echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+        source ~/.bashrc
+    fi
 }
 
 run_server() {
     echo -e "${BLUE}Đang chạy server...${NC}"
+    
+    # Kiểm tra xem Python đã được cài đặt chưa
+    if ! command -v python &> /dev/null; then
+        echo -e "${RED}Lỗi: Python chưa được cài đặt. Vui lòng chạy tùy chọn 'Cài đặt gói' trước.${NC}"
+        return
+    fi
+    
+    # Kiểm tra xem localtunnel đã được cài đặt chưa
+    if ! command -v lt &> /dev/null; then
+        echo -e "${RED}Lỗi: Localtunnel chưa được cài đặt. Vui lòng chạy tùy chọn 'Cài đặt gói' trước.${NC}"
+        return
+    fi
+    
     python -m http.server 8000 &
     SERVER_PID=$!
     echo -e "${GREEN}Server HTTP đang chạy trên cổng 8000 với PID: $SERVER_PID${NC}"
