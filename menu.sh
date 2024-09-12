@@ -41,7 +41,7 @@ compare_versions() {
     elif [[ "$(printf '%s\n' "$ver1" "$ver2" | sort -V | head -n1)" == "$ver1" ]]; then
         return 1  # ver1 is smaller
     else
-        return 2  # ver1 is larger
+        return 2  # ver1 is greater
     fi
 }
 
@@ -93,11 +93,11 @@ check_update() {
 # Function to display header
 show_header() {
     clear
-    echo -e "${RED}╔═════════════════════════════════════════════╗${NC}"
-    echo -e "${RED}║${YELLOW}              TXA Advanced Script            ${RED}║${NC}"
-    echo -e "${RED}║${GREEN}           Copyright © 2024 TXA              ${RED}║${NC}"
-    echo -e "${RED}║${BLUE}              Version: $VERSION                ${RED}║${NC}"
-    echo -e "${RED}╚═════════════════════════════════════════════╝${NC}"
+    echo -e "${RED}╔══════════════════════════════════════════════╗${NC}"
+    echo -e "${RED}║${YELLOW}               TXA Advanced Script             ${RED}║${NC}"
+    echo -e "${RED}║${GREEN}            Copyright © 2024 TXA                ${RED}║${NC}"
+    echo -e "${RED}║${BLUE}               Version: $VERSION                 ${RED}║${NC}"
+    echo -e "${RED}╚══════════════════════════════════════════════╝${NC}"
     echo
 }
 
@@ -116,7 +116,6 @@ show_warning() {
 
 # Function to display main menu
 show_main_menu() {
-    show_header
     echo -e "${CYAN}Main Menu:${NC}"
     echo -e "${BLUE}1. Open Menu${NC}"
     echo -e "${BLUE}2. Enter Key${NC}"
@@ -126,7 +125,6 @@ show_main_menu() {
 
 # Function to display submenu
 show_submenu() {
-    show_header
     echo -e "${CYAN}Submenu:${NC}"
     echo -e "${BLUE}1. System Info${NC}"
     echo -e "${BLUE}2. Ping IP${NC}"
@@ -182,7 +180,7 @@ update_user_info() {
         echo "$response" > "$USER_INFO_FILE"
         echo -e "${GREEN}User information updated.${NC}"
     else
-        echo -e "${RED}No key found. Please enter a key first.${NC}"
+        echo -e "${RED}Key not found. Please enter a key first.${NC}"
     fi
 }
 
@@ -200,6 +198,7 @@ show_user_info() {
 # Function to handle submenu
 handle_submenu() {
     while true; do
+        show_header
         show_submenu
         local choice
         read -p "Enter your choice: " choice
@@ -211,7 +210,7 @@ handle_submenu() {
                 if is_key_valid; then
                     advanced_menu
                 else
-                    echo -e "${RED}You need to enter a valid key to access the advanced menu.${NC}"
+                    echo -e "${RED}You need a valid key to access the advanced menu.${NC}"
                     input_key
                 fi
                 ;;
@@ -249,7 +248,7 @@ check_ip() {
     echo "Your IP address is: $(curl -s ifconfig.me)"
 }
 
-# Function for advanced menu (only displayed with valid key)
+# Function for advanced menu (only shown with valid key)
 advanced_menu() {
     show_header
     echo -e "${CYAN}Advanced Menu:${NC}"
@@ -270,7 +269,7 @@ advanced_menu() {
 # Function for port scanning
 port_scan() {
     show_header
-    read -p "Enter IP address to scan ports: " ip
+    read -p "Enter IP address to scan: " ip
     nmap $ip
 }
 
@@ -279,7 +278,7 @@ network_analysis() {
     show_header
     echo "Analyzing network traffic..."
     # Add network traffic analysis logic here
-    echo "This feature is under development."
+    echo "This feature is currently under development."
 }
 
 # Function to run in background for automatic update checks
@@ -300,6 +299,7 @@ main() {
     auto_update_check &
     
     while true; do
+        show_header
         show_main_menu
         local choice
         read -p "Enter your choice: " choice
