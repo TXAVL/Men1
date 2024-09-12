@@ -36,41 +36,36 @@ show_warning() {
         return 0  # Warning already accepted, proceed
     fi
     
-    while true; do
-        show_header
-        echo -e "${RED}WARNING:${NC}"
-        echo -e "${YELLOW}After installing v$VERSION, all Termux permissions and features will belong to TxaServer.${NC}"
-        echo -e "${YELLOW}If you want to revert to the original state, please reinstall Termux.${NC}"
-        echo
-        echo -e "${CYAN}1. Accept and continue${NC}"
-        echo -e "${CYAN}2. Decline and exit${NC}"
-        echo
-        
-        # Prompt for user input
-        read -r -p "Enter your choice (1 or 2): " choice
-        
-        # Debugging output to check what's being read
-        echo "DEBUG: You entered: '$choice'"
-
-        # Handle user input
-        case "$choice" in
-            1)
-                touch "$WARNING_ACCEPTED_FILE"
-                echo -e "${GREEN}Warning accepted. Proceeding with the script.${NC}"
-                sleep 2
-                return 0
-                ;;
-            2)
-                echo -e "${RED}Installation cancelled. Exiting...${NC}"
-                sleep 2
-                exit 1
-                ;;
-            *)
-                echo -e "${RED}Invalid choice. Please try again.${NC}"
-                sleep 2
-                ;;
-        esac
-    done
+    show_header
+    echo -e "${RED}WARNING:${NC}"
+    echo -e "${YELLOW}After installing v$VERSION, all Termux permissions and features will belong to TxaServer.${NC}"
+    echo -e "${YELLOW}If you want to revert to the original state, please reinstall Termux.${NC}"
+    echo
+    echo -e "${CYAN}1. Accept and continue${NC}"
+    echo -e "${CYAN}2. Decline and exit${NC}"
+    echo
+    
+    # Prompt for user input
+    read -r -p "Enter your choice (1 or 2): " choice
+    
+    # Handle user input
+    case "$choice" in
+        1)
+            touch "$WARNING_ACCEPTED_FILE"
+            echo -e "${GREEN}Warning accepted. Proceeding with the script.${NC}"
+            sleep 2
+            ;;
+        2)
+            echo -e "${RED}Installation cancelled. Exiting...${NC}"
+            sleep 2
+            exit 1
+            ;;
+        *)
+            echo -e "${RED}Invalid choice. Exiting...${NC}"
+            sleep 2
+            exit 1
+            ;;
+    esac
 }
 
 # Function to display main menu
