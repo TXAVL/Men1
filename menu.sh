@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="1.2.7"
+VERSION="1.2.8"
 SCRIPT_URL="https://txavl.github.io/Men1/menu.sh"
 KEY_FILE="$HOME/.txa_key"
 API_URL="https://key.txavideo.online/api/validate_key.php"
@@ -107,9 +107,9 @@ check_update() {
 show_header() {
     clear
     echo -e "${RED}╔════════════════════════════════════════╗${NC}"
-    echo -e "${RED}║${YELLOW}           TXA Advanced Script          ${RED}║${NC}"
-    echo -e "${RED}║${GREEN}        Copyright © 2024 TXA            ${RED}║${NC}"
-    echo -e "${RED}║${BLUE}           Version: $VERSION              ${RED}║${NC}"
+    echo -e "${RED}║${YELLOW}           TXA Advanced Script           ${RED}║${NC}"
+    echo -e "${RED}║${GREEN}        Copyright © 2024 TXA             ${RED}║${NC}"
+    echo -e "${RED}║${BLUE}           Version: $VERSION                 ${RED}║${NC}"
     echo -e "${RED}╚════════════════════════════════════════╝${NC}"
     echo
 }
