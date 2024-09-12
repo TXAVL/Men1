@@ -9,7 +9,7 @@ CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 # Thông tin script
-SCRIPT_VERSION="1.6"
+SCRIPT_VERSION="1.7"
 CURRENT_YEAR=$(date +"%Y")
 VERSION_API="https://key.txavideo.online/version.php"
 
@@ -134,9 +134,9 @@ check_update() {
 
 install_packages() {
     echo -e "${BLUE}Đang cài đặt các gói cần thiết...${NC}"
-    pkg update -y
-    pkg install -y python nodejs ffmpeg
-    pip install yt-dlp
+    pkg update -y -q
+    pkg install -y -q python nodejs ffmpeg
+    pip install -q yt-dlp
     npm install -g localtunnel
     echo -e "${GREEN}Cài đặt gói hoàn tất.${NC}"
 }
@@ -149,6 +149,8 @@ run_server() {
 
 view_changelog() {
     echo -e "${CYAN}Changelog:${NC}"
+    echo -e "Version 1.7:"
+    echo -e "- Cải thiện quá trình cài đặt gói để giảm cảnh báo"
     echo -e "Version 1.6:"
     echo -e "- Cải thiện kiểm tra yêu cầu hệ thống"
     echo -e "- Thêm hàm show_banner và show_menu"
