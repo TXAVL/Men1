@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="1.2.2"
+VERSION="1.2.3"
 SCRIPT_URL="https://txavl.github.io/Men1/menu.sh"
 KEY_FILE="$HOME/.txa_key"
 API_URL="https://key.txavideo.online/api/validate_key.php"
@@ -79,6 +79,91 @@ show_main_menu() {
     echo -e "${BLUE}3. Exit${NC}"
     echo
 }
+
+# Function to input a key
+input_key() {
+    local key
+    show_header
+    echo -e "${CYAN}Enter your key:${NC}"
+    read -r -p "Key: " key
+    
+    # Validate the key (example validation logic)
+    if [[ -n "$key" ]]; then
+        echo -e "${GREEN}Key entered: $key${NC}"
+        # You can add more logic to handle the key, e.g., save it to a file or validate it against an API.
+        # Example: Save key to a file
+        echo "$key" > "$KEY_FILE"
+        echo -e "${GREEN}Key saved successfully.${NC}"
+    else
+        echo -e "${RED}No key entered. Please try again.${NC}"
+    fi
+    sleep 2
+}
+
+# Function to handle submenu
+handle_submenu() {
+    local choice
+    while true; do
+        show_header
+        echo -e "${CYAN}Submenu:${NC}"
+        echo -e "${BLUE}1. Option 1${NC}"
+        echo -e "${BLUE}2. Option 2${NC}"
+        echo -e "${BLUE}3. Return to Main Menu${NC}"
+        echo
+        
+        read -p "Enter your choice: " choice
+        case $choice in
+            1)
+                echo -e "${GREEN}You selected Option 1.${NC}"
+                # Add code for Option 1 here
+                ;;
+            2)
+                echo -e "${GREEN}You selected Option 2.${NC}"
+                # Add code for Option 2 here
+                ;;
+            3)
+                return
+                ;;
+            *)
+                echo -e "${RED}Invalid choice. Please try again.${NC}"
+                ;;
+        esac
+        read -p "Press Enter to continue..."
+    done
+}
+
+# Function to handle advanced menu
+advanced_menu() {
+    local choice
+    while true; do
+        show_header
+        echo -e "${CYAN}Advanced Menu:${NC}"
+        echo -e "${BLUE}1. Advanced Option 1${NC}"
+        echo -e "${BLUE}2. Advanced Option 2${NC}"
+        echo -e "${BLUE}3. Return to Main Menu${NC}"
+        echo
+        
+        read -p "Enter your choice: " choice
+        case $choice in
+            1)
+                echo -e "${GREEN}You selected Advanced Option 1.${NC}"
+                # Add code for Advanced Option 1 here
+                ;;
+            2)
+                echo -e "${GREEN}You selected Advanced Option 2.${NC}"
+                # Add code for Advanced Option 2 here
+                ;;
+            3)
+                return
+                ;;
+            *)
+                echo -e "${RED}Invalid choice. Please try again.${NC}"
+                ;;
+        esac
+        read -p "Press Enter to continue..."
+    done
+}
+
 
 # Function to handle main menu choices
 handle_main_menu() {
