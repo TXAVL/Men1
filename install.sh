@@ -181,6 +181,7 @@ main() {
         esac
         echo
         read -p "Nhấn Enter để tiếp tục..."
+        clear
     done
 }
 
