@@ -23,7 +23,7 @@ REQUIRED_PACKAGES="curl nmap jq"
 show_header() {
     clear
     echo -e "${RED}╔══════════════════════════════════════════════╗${NC}"
-    echo -e "${RED}║${YELLOW}               TXA Advanced Script             ${RED}║${NC}"
+    echo -e "${RED}║${YELLOW}               TXA Advanced Script            ${RED}║${NC}"
     echo -e "${RED}║${GREEN}            Copyright © 2024 TXA                ${RED}║${NC}"
     echo -e "${RED}║${BLUE}               Version: $VERSION                 ${RED}║${NC}"
     echo -e "${RED}╚══════════════════════════════════════════════╝${NC}"
@@ -45,8 +45,15 @@ show_warning() {
         echo -e "${CYAN}1. Accept and continue${NC}"
         echo -e "${CYAN}2. Decline and exit${NC}"
         echo
-        read -p "Enter your choice (1 or 2): " choice
-        case $choice in
+        
+        # Prompt for user input
+        read -r -p "Enter your choice (1 or 2): " choice
+        
+        # Debugging output to check what's being read
+        echo "DEBUG: You entered: '$choice'"
+
+        # Handle user input
+        case "$choice" in
             1)
                 touch "$WARNING_ACCEPTED_FILE"
                 echo -e "${GREEN}Warning accepted. Proceeding with the script.${NC}"
