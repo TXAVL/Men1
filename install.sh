@@ -21,7 +21,7 @@ verify_key() {
     echo -e "${BLUE}Nhập key của bạn: ${NC}"
     read user_key
     response=$(curl -s -d "key=$user_key" $KEY_API)
-    if [[ $response == *"valid"* ]]; then
+    if [[ $response == *"is valid"* ]]; then
         echo $user_key > $HOME/.txa_key
         echo -e "${GREEN}Key hợp lệ. Đã lưu key.${NC}"
         return 0
