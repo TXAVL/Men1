@@ -9,7 +9,7 @@ CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 # Thông tin script
-SCRIPT_VERSION="1.9"
+SCRIPT_VERSION="1.9.5"
 CURRENT_YEAR=$(date +"%Y")
 VERSION_API="https://key.txavideo.online/version.php"
 
@@ -293,7 +293,8 @@ install_packages() {
 run_server() {
     if [ ! -f "$SERVER_JS_PATH" ]; then
         echo -e "${RED}Lỗi: Không tìm thấy tệp server.js tại $SERVER_JS_PATH.${NC}"
-        exit 1
+        sleep 3
+        main
     fi
 
     echo -e "${BLUE}Đang khởi chạy server Node.js...${NC}"
