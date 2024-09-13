@@ -9,7 +9,7 @@ CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 # Thông tin script
-SCRIPT_VERSION="1.9.5"
+SCRIPT_VERSION="2.0"
 CURRENT_YEAR=$(date +"%Y")
 VERSION_API="https://key.txavideo.online/version.php"
 
@@ -128,16 +128,25 @@ show_banner() {
     echo -e "${CYAN}================================${NC}"
     echo -e "${YELLOW}    TXA VLOG Server Script    ${NC}"
     echo -e "${CYAN}        Version $SCRIPT_VERSION        ${NC}"
+    echo -e "${CYAN}        YeAr $CURRENT_YEAR            ${NC}" 
     echo -e "${CYAN}================================${NC}"
 }
 
 show_menu() {
+    clear
+    show_banner
     echo -e "${GREEN}1. Kiểm tra yêu cầu hệ thống${NC}"
     echo -e "${GREEN}2. Kiểm tra cập nhật${NC}"
     echo -e "${GREEN}3. Cài đặt gói${NC}"
     echo -e "${GREEN}4. Chạy server${NC}"
     echo -e "${GREEN}5. Quản lý tệp và thư mục${NC}"
-    echo -e "${GREEN}6. Xác thực key${NC}"
+    
+    # Kiểm tra nếu key đã được lưu và hợp lệ
+    if ! check_saved_key; then
+        echo -e "${GREEN}6. Xác thực key${NC}"
+        echo -e "${GREEN}10. Mua key${NC}"
+    fi
+
     echo -e "${GREEN}7. Xem changelog${NC}"
     echo -e "${GREEN}8. Hướng dẫn sử dụng${NC}"
     echo -e "${GREEN}9. Thoát${NC}"
@@ -358,6 +367,9 @@ manage_files() {
 
 view_changelog() {
     echo -e "${CYAN}Changelog:${NC}"
+    echo -e "Version 2.0:"
+    echo -e "-Sửa đổi lại ui"
+    echo -e "-Phần Run Server cũng sửa lại 1 chút còn về phía không tìm thấy file server.js thì hãy tải nó từ trên github của tôi nhé!"
     echo -e "Version 1.9:"
     echo -e "-Đã sửa đổi lại script để thêm mục xác thực key"
     echo -e "-Sửa lại phần menu run server"
@@ -382,7 +394,7 @@ show_usage() {
     echo -e "5. Xem changelog: Xem lịch sử các thay đổi của script."
     echo -e "6. Hướng dẫn sử dụng: Hiển thị thông tin này."
     echo -e "7. Thoát: Kết thúc script."
-    echo -e "8. Hãy nhớ bạn có thể mua key tại https..... hoặc ib qua fb: https://bom.so/FB_ADMIN!"
+    echo -e "8. Hãy nhớ bạn có thể mua key tại https://rgl.txavideo.online/u?txa=txa_ji5TS6 hoặc ib qua fb: https://bom.so/FB_ADMIN!"
     echo -e "\nLưu ý: Đảm bảo bạn có kết nối internet ổn định khi sử dụng script này."
 }
 
@@ -393,18 +405,36 @@ main() {
         show_banner
         show_menu
         read choice
-        case $choice in
-            1) check_system_requirements ;;
-            2) check_update ;;
-            3) install_packages ;;
-            4) run_server ;;
-            5) manage_files ;;
-            6) verify_key ;;
-            7) view_changelog ;;
-            8) show_usage ;;
-            9) echo -e "${YELLOW}Cảm ơn bạn đã sử dụng TXA VLOG Server Script!${NC}"; exit 0 ;;
-            *) echo -e "${RED}Lựa chọn không hợp lệ. Vui lòng thử lại.${NC}" ;;
-        esac
+        
+        # Kiểm tra xem key đã được lưu và hợp lệ chưa
+        if check_saved_key; then
+            case $choice in
+                1) check_system_requirements ;;
+                2) check_update ;;
+                3) install_packages ;;
+                4) run_server ;;
+                5) manage_files ;;
+                7) view_changelog ;;
+                8) show_usage ;;
+                9) echo -e "${YELLOW}Cảm ơn bạn đã sử dụng TXA VLOG Server Script!${NC}"; exit 0 ;;
+                10) termux-open-url https://rgl.txavideo.online/u?txa=txa_ji5TS6; clear; main;;
+                *) echo -e "${RED}Lựa chọn không hợp lệ. Vui lòng thử lại.${NC}" ;;
+            esac
+        else
+            case $choice in
+                1) check_system_requirements ;;
+                2) check_update ;;
+                3) install_packages ;;
+                4) run_server ;;
+                5) manage_files ;;
+                6) verify_key ;; # Chỉ hiện khi key chưa được xác thực
+                7) view_changelog ;;
+                8) show_usage ;;
+                9) echo -e "${YELLOW}Cảm ơn bạn đã sử dụng TXA VLOG Server Script!${NC}"; exit 0 ;;
+                *) echo -e "${RED}Lựa chọn không hợp lệ. Vui lòng thử lại.${NC}" ;;
+            esac
+        fi
+        
         echo
         read -p "Nhấn Enter để tiếp tục..."
         clear
