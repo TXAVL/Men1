@@ -241,6 +241,49 @@ install_packages() {
 }
 
 # Sửa đổi hàm run_server
+# run_server() {
+#     if ! check_saved_key; then
+#         if ! verify_key; then
+#             echo -e "${RED}Không thể chạy server mà không có key hợp lệ.${NC}"
+#             return
+#         fi
+#     fi
+    
+#     echo -e "${BLUE}Đang chạy server...${NC}"
+    
+#     # Kiểm tra xem Python đã được cài đặt chưa
+#     if ! command -v python &> /dev/null; then
+#         echo -e "${RED}Lỗi: Python chưa được cài đặt. Vui lòng chạy tùy chọn 'Cài đặt gói' trước.${NC}"
+#         return
+#     fi
+    
+#     # Kiểm tra xem localtunnel đã được cài đặt chưa
+#     if ! command -v lt &> /dev/null; then
+#         echo -e "${RED}Lỗi: Localtunnel chưa được cài đặt. Vui lòng chạy tùy chọn 'Cài đặt gói' trước.${NC}"
+#         return
+#     fi
+    
+#     # Cho phép người dùng chọn cổng
+#     echo -e "${YELLOW}Nhập cổng bạn muốn sử dụng (mặc định: 8000): ${NC}"
+#     read port
+#     port=${port:-8000}
+    
+#     python -m http.server $port &
+#     SERVER_PID=$!
+#     echo -e "${GREEN}Server HTTP đang chạy trên cổng $port với PID: $SERVER_PID${NC}"
+    
+#     echo -e "${BLUE}Đang tạo tunnel...${NC}"
+#     lt --port $port &
+#     TUNNEL_PID=$!
+#     echo -e "${GREEN}Tunnel đã được tạo với PID: $TUNNEL_PID${NC}"
+    
+#     echo -e "${YELLOW}Nhấn Enter để dừng server và tunnel...${NC}"
+#     read
+    
+#     kill $SERVER_PID $TUNNEL_PID
+#     echo -e "${GREEN}Server và tunnel đã được dừng.${NC}"
+# }
+
 run_server() {
     if ! check_saved_key; then
         if ! verify_key; then
@@ -251,9 +294,9 @@ run_server() {
     
     echo -e "${BLUE}Đang chạy server...${NC}"
     
-    # Kiểm tra xem Python đã được cài đặt chưa
-    if ! command -v python &> /dev/null; then
-        echo -e "${RED}Lỗi: Python chưa được cài đặt. Vui lòng chạy tùy chọn 'Cài đặt gói' trước.${NC}"
+    # Kiểm tra xem Node.js đã được cài đặt chưa
+    if ! command -v node &> /dev/null; then
+        echo -e "${RED}Lỗi: Node.js chưa được cài đặt. Vui lòng chạy tùy chọn 'Cài đặt gói' trước.${NC}"
         return
     fi
     
@@ -268,9 +311,60 @@ run_server() {
     read port
     port=${port:-8000}
     
-    python -m http.server $port &
+    # Tạo file server.js tạm thời
+    cat > /tmp/server.js << EOL
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
+
+const server = http.createServer((req, res) => {
+    let filePath = path.join(process.env.HOME, 'shared', req.url);
+    if (filePath === path.join(process.env.HOME, 'shared', '/')) {
+        filePath = path.join(process.env.HOME, 'shared', 'index.html');
+    }
+
+    const extname = String(path.extname(filePath)).toLowerCase();
+    const contentType = {
+        '.html': 'text/html',
+        '.js': 'text/javascript',
+        '.css': 'text/css',
+        '.json': 'application/json',
+        '.png': 'image/png',
+        '.jpg': 'image/jpg',
+        '.gif': 'image/gif',
+        '.wav': 'audio/wav',
+        '.mp4': 'video/mp4',
+        '.woff': 'application/font-woff',
+        '.ttf': 'application/font-ttf',
+        '.eot': 'application/vnd.ms-fontobject',
+        '.otf': 'application/font-otf',
+        '.svg': 'application/image/svg+xml'
+    }[extname] || 'application/octet-stream';
+
+    fs.readFile(filePath, (error, content) => {
+        if (error) {
+            if (error.code === 'ENOENT') {
+                res.writeHead(404, { 'Content-Type': 'text/html' });
+                res.end('404 Not Found');
+            } else {
+                res.writeHead(500);
+                res.end('Sorry, check with the site admin for error: ' + error.code);
+            }
+        } else {
+            res.writeHead(200, { 'Content-Type': contentType });
+            res.end(content, 'utf-8');
+        }
+    });
+});
+
+server.listen(${port}, () => {
+    console.log('Server running at http://localhost:${port}/');
+});
+EOL
+
+    node /tmp/server.js &
     SERVER_PID=$!
-    echo -e "${GREEN}Server HTTP đang chạy trên cổng $port với PID: $SERVER_PID${NC}"
+    echo -e "${GREEN}Server Node.js đang chạy trên cổng $port với PID: $SERVER_PID${NC}"
     
     echo -e "${BLUE}Đang tạo tunnel...${NC}"
     lt --port $port &
@@ -281,6 +375,7 @@ run_server() {
     read
     
     kill $SERVER_PID $TUNNEL_PID
+    rm /tmp/server.js
     echo -e "${GREEN}Server và tunnel đã được dừng.${NC}"
 }
 
