@@ -402,7 +402,7 @@ show_usage() {
     echo -e "5. Xem changelog: Xem lịch sử các thay đổi của script."
     echo -e "6. Hướng dẫn sử dụng: Hiển thị thông tin này."
     echo -e "7. Thoát: Kết thúc script."
-    echo -e "8. Hãy nhớ bạn có thể mua key tại https://rgl.txavideo.online/u?txa=txa_ji5TS6 hoặc ib qua fb: https://bom.so/FB_ADMIN!"
+    echo -e "8. Hãy nhớ bạn có thể mua key tại ${CYAN} mục số 10 trong menu chính ${NC} hoặc ib qua fb: https://bom.so/FB_ADMIN!"
     echo -e "\nLưu ý: Đảm bảo bạn có kết nối internet ổn định khi sử dụng script này."
 }
 
