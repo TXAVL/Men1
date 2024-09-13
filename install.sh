@@ -384,6 +384,15 @@ view_changelog() {
     echo -e "- Cập nhật cách kiểm tra RAM và dung lượng trống"
 }
 
+open_buy(){
+    clear
+    show_banner
+    echo -e "Đang tiến hành mở trình duyệt...."
+    termux-open-url https://rgl.txavideo.online/u?txa=txa_ji5TS6
+    sleep 6
+    main
+}    
+
 show_usage() {
     echo -e "${CYAN}Hướng dẫn sử dụng:${NC}"
     echo -e "1. Kiểm tra yêu cầu hệ thống: Đảm bảo thiết bị của bạn đáp ứng các yêu cầu tối thiểu."
@@ -416,7 +425,7 @@ main() {
                 7) view_changelog ;;
                 8) show_usage ;;
                 9) echo -e "${YELLOW}Cảm ơn bạn đã sử dụng TXA VLOG Server Script!${NC}"; exit 0 ;;
-                10) termux-open-url https://rgl.txavideo.online/u?txa=txa_ji5TS6; clear; main;;
+                10) open_buy
                 *) echo -e "${RED}Lựa chọn không hợp lệ. Vui lòng thử lại.${NC}" ;;
             esac
         else
