@@ -9,9 +9,40 @@ CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 # Thông tin script
-SCRIPT_VERSION="1.8"
+SCRIPT_VERSION="1.9"
 CURRENT_YEAR=$(date +"%Y")
 VERSION_API="https://key.txavideo.online/version.php"
+
+# Thêm biến cho API xác thực key
+KEY_API="https://key.txavideo.online/verify_key.php"
+
+# Hàm xác thực key
+verify_key() {
+    echo -e "${BLUE}Nhập key của bạn: ${NC}"
+    read user_key
+    response=$(curl -s -d "key=$user_key" $KEY_API)
+    if [[ $response == *"valid"* ]]; then
+        echo $user_key > $HOME/.txa_key
+        echo -e "${GREEN}Key hợp lệ. Đã lưu key.${NC}"
+        return 0
+    else
+        echo -e "${RED}Key không hợp lệ. Vui lòng thử lại.${NC}"
+        return 1
+    fi
+}
+
+# Hàm kiểm tra key đã lưu
+check_saved_key() {
+    if [ -f $HOME/.txa_key ]; then
+        saved_key=$(cat $HOME/.txa_key)
+        response=$(curl -s -d "key=$saved_key" $KEY_API)
+        if [[ $response == *"valid"* ]]; then
+            echo -e "${GREEN}Key hợp lệ. Tiếp tục...${NC}"
+            return 0
+        fi
+    fi
+    return 1
+}
 
 # Hàm kiểm tra yêu cầu hệ thống
 check_system_requirements() {
@@ -102,9 +133,11 @@ show_menu() {
     echo -e "${GREEN}2. Kiểm tra cập nhật${NC}"
     echo -e "${GREEN}3. Cài đặt gói${NC}"
     echo -e "${GREEN}4. Chạy server${NC}"
-    echo -e "${GREEN}5. Xem changelog${NC}"
-    echo -e "${GREEN}6. Hướng dẫn sử dụng${NC}"
-    echo -e "${GREEN}7. Thoát${NC}"
+    echo -e "${GREEN}5. Quản lý tệp và thư mục${NC}"
+    echo -e "${GREEN}6. Xác thực key${NC}"
+    echo -e "${GREEN}7. Xem changelog${NC}"
+    echo -e "${GREEN}8. Hướng dẫn sử dụng${NC}"
+    echo -e "${GREEN}9. Thoát${NC}"
     echo -e "${YELLOW}Nhập lựa chọn của bạn: ${NC}"
 }
 
@@ -207,7 +240,15 @@ install_packages() {
     fi
 }
 
+# Sửa đổi hàm run_server
 run_server() {
+    if ! check_saved_key; then
+        if ! verify_key; then
+            echo -e "${RED}Không thể chạy server mà không có key hợp lệ.${NC}"
+            return
+        fi
+    fi
+    
     echo -e "${BLUE}Đang chạy server...${NC}"
     
     # Kiểm tra xem Python đã được cài đặt chưa
@@ -222,12 +263,17 @@ run_server() {
         return
     fi
     
-    python -m http.server 8000 &
+    # Cho phép người dùng chọn cổng
+    echo -e "${YELLOW}Nhập cổng bạn muốn sử dụng (mặc định: 8000): ${NC}"
+    read port
+    port=${port:-8000}
+    
+    python -m http.server $port &
     SERVER_PID=$!
-    echo -e "${GREEN}Server HTTP đang chạy trên cổng 8000 với PID: $SERVER_PID${NC}"
+    echo -e "${GREEN}Server HTTP đang chạy trên cổng $port với PID: $SERVER_PID${NC}"
     
     echo -e "${BLUE}Đang tạo tunnel...${NC}"
-    lt --port 8000 &
+    lt --port $port &
     TUNNEL_PID=$!
     echo -e "${GREEN}Tunnel đã được tạo với PID: $TUNNEL_PID${NC}"
     
@@ -238,8 +284,38 @@ run_server() {
     echo -e "${GREEN}Server và tunnel đã được dừng.${NC}"
 }
 
+# Hàm quản lý tệp và thư mục
+manage_files() {
+    echo -e "${BLUE}Quản lý tệp và thư mục${NC}"
+    echo -e "1. Tạo thư mục mới"
+    echo -e "2. Liệt kê tệp trong thư mục"
+    echo -e "3. Xóa tệp hoặc thư mục"
+    echo -e "4. Quay lại menu chính"
+    read -p "Chọn một tùy chọn: " file_choice
+    case $file_choice in
+        1) 
+            read -p "Nhập tên thư mục mới: " new_dir
+            mkdir -p $HOME/shared/$new_dir
+            echo -e "${GREEN}Đã tạo thư mục $new_dir${NC}"
+            ;;
+        2)
+            ls -l $HOME/shared
+            ;;
+        3)
+            read -p "Nhập tên tệp hoặc thư mục cần xóa: " del_item
+            rm -rf $HOME/shared/$del_item
+            echo -e "${GREEN}Đã xóa $del_item${NC}"
+            ;;
+        4) return ;;
+        *) echo -e "${RED}Lựa chọn không hợp lệ${NC}" ;;
+    esac
+}
+
 view_changelog() {
     echo -e "${CYAN}Changelog:${NC}"
+    echo -e "Version 1.9:"
+    echo -e "-Đã sửa đổi lại script để thêm mục xác thực key"
+    echo -e "-Sửa lại phần menu run server"
     echo -e "Version 1.8:"
     echo -e "- Thêm chức năng chạy server HTTP và tạo tunnel"
     echo -e "- Thêm hướng dẫn sử dụng"
@@ -276,9 +352,11 @@ main() {
             2) check_update ;;
             3) install_packages ;;
             4) run_server ;;
-            5) view_changelog ;;
-            6) show_usage ;;
-            7) echo -e "${YELLOW}Cảm ơn bạn đã sử dụng TXA VLOG Server Script!${NC}"; exit 0 ;;
+            5) manage_files ;;
+            6) verify_key ;;
+            7) view_changelog ;;
+            8) show_usage ;;
+            9) echo -e "${YELLOW}Cảm ơn bạn đã sử dụng TXA VLOG Server Script!${NC}"; exit 0 ;;
             *) echo -e "${RED}Lựa chọn không hợp lệ. Vui lòng thử lại.${NC}" ;;
         esac
         echo
