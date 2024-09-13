@@ -40,7 +40,6 @@ check_saved_key() {
         saved_key=$(cat $HOME/.txa_key)
         response=$(curl -s -d "key=$saved_key" $KEY_API)
         if [[ $response == *"valid"* ]]; then
-            echo -e "${GREEN}Key hợp lệ. Tiếp tục...${NC}"
             return 0
         fi
     fi
@@ -141,7 +140,7 @@ show_menu() {
     echo -e "${GREEN}4. Chạy server${NC}"
     echo -e "${GREEN}5. Quản lý tệp và thư mục${NC}"
     
-    # Kiểm tra nếu key đã được lưu và hợp lệ
+    # Kiểm tra key, chỉ hiển thị tùy chọn Mua Key nếu chưa có hoặc không hợp lệ
     if ! check_saved_key; then
         echo -e "${GREEN}6. Xác thực key${NC}"
         echo -e "${GREEN}10. Mua key${NC}"
