@@ -16,6 +16,9 @@ VERSION_API="https://key.txavideo.online/version.php"
 # Thêm biến cho API xác thực key
 KEY_API="https://key.txavideo.online/verify_key.php"
 
+# Đường dẫn mới cho server.js
+SERVER_JS_PATH="$HOME/tmp/server.js"
+
 # Hàm xác thực key
 verify_key() {
     echo -e "${BLUE}Nhập key của bạn: ${NC}"
@@ -230,6 +233,8 @@ install_packages() {
         echo -e "${YELLOW}Đang cài đặt localtunnel...${NC}"
         npm install -g localtunnel
     fi
+
+    install_ngrok
     
     echo -e "${GREEN}Cài đặt gói hoàn tất.${NC}"
     
@@ -284,99 +289,43 @@ install_packages() {
 #     echo -e "${GREEN}Server và tunnel đã được dừng.${NC}"
 # }
 
+# Hàm để chạy server
 run_server() {
-    if ! check_saved_key; then
-        if ! verify_key; then
-            echo -e "${RED}Không thể chạy server mà không có key hợp lệ.${NC}"
-            return
-        fi
+    if [ ! -f "$SERVER_JS_PATH" ]; then
+        echo -e "${RED}Lỗi: Không tìm thấy tệp server.js tại $SERVER_JS_PATH.${NC}"
+        exit 1
     fi
-    
-    echo -e "${BLUE}Đang chạy server...${NC}"
-    
-    # Kiểm tra xem Node.js đã được cài đặt chưa
-    if ! command -v node &> /dev/null; then
-        echo -e "${RED}Lỗi: Node.js chưa được cài đặt. Vui lòng chạy tùy chọn 'Cài đặt gói' trước.${NC}"
-        return
-    fi
-    
-    # Kiểm tra xem localtunnel đã được cài đặt chưa
-    if ! command -v lt &> /dev/null; then
-        echo -e "${RED}Lỗi: Localtunnel chưa được cài đặt. Vui lòng chạy tùy chọn 'Cài đặt gói' trước.${NC}"
-        return
-    fi
-    
-    # Cho phép người dùng chọn cổng
-    echo -e "${YELLOW}Nhập cổng bạn muốn sử dụng (mặc định: 8000): ${NC}"
-    read port
-    port=${port:-8000}
-    
-    # Tạo file server.js tạm thời
-    cat > /tmp/server.js << EOL
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
 
-const server = http.createServer((req, res) => {
-    let filePath = path.join(process.env.HOME, 'shared', req.url);
-    if (filePath === path.join(process.env.HOME, 'shared', '/')) {
-        filePath = path.join(process.env.HOME, 'shared', 'index.html');
-    }
-
-    const extname = String(path.extname(filePath)).toLowerCase();
-    const contentType = {
-        '.html': 'text/html',
-        '.js': 'text/javascript',
-        '.css': 'text/css',
-        '.json': 'application/json',
-        '.png': 'image/png',
-        '.jpg': 'image/jpg',
-        '.gif': 'image/gif',
-        '.wav': 'audio/wav',
-        '.mp4': 'video/mp4',
-        '.woff': 'application/font-woff',
-        '.ttf': 'application/font-ttf',
-        '.eot': 'application/vnd.ms-fontobject',
-        '.otf': 'application/font-otf',
-        '.svg': 'application/image/svg+xml'
-    }[extname] || 'application/octet-stream';
-
-    fs.readFile(filePath, (error, content) => {
-        if (error) {
-            if (error.code === 'ENOENT') {
-                res.writeHead(404, { 'Content-Type': 'text/html' });
-                res.end('404 Not Found');
-            } else {
-                res.writeHead(500);
-                res.end('Sorry, check with the site admin for error: ' + error.code);
-            }
-        } else {
-            res.writeHead(200, { 'Content-Type': contentType });
-            res.end(content, 'utf-8');
-        }
-    });
-});
-
-server.listen(${port}, () => {
-    console.log('Server running at http://localhost:${port}/');
-});
-EOL
-
-    node /tmp/server.js &
+    echo -e "${BLUE}Đang khởi chạy server Node.js...${NC}"
+    node "$SERVER_JS_PATH" &
     SERVER_PID=$!
-    echo -e "${GREEN}Server Node.js đang chạy trên cổng $port với PID: $SERVER_PID${NC}"
-    
-    echo -e "${BLUE}Đang tạo tunnel...${NC}"
-    lt --port $port &
+    echo -e "${GREEN}Server Node.js đang chạy trên cổng 2311 với PID: $SERVER_PID${NC}"
+
+    # Dùng ngrok thay vì localtunnel
+    echo -e "${BLUE}Đang tạo tunnel với ngrok...${NC}"
+    termux-open-url https://ngrok.com/signup
+    read -p "Nhập Authtoken từ Ngrok: " NGROK_TOKEN
+    ngrok authtoken "$NGROK_TOKEN"
+    ngrok http 2311 &
     TUNNEL_PID=$!
     echo -e "${GREEN}Tunnel đã được tạo với PID: $TUNNEL_PID${NC}"
     
     echo -e "${YELLOW}Nhấn Enter để dừng server và tunnel...${NC}"
     read
-    
-    kill $SERVER_PID $TUNNEL_PID
-    rm /tmp/server.js
-    echo -e "${GREEN}Server và tunnel đã được dừng.${NC}"
+    kill $SERVER_PID
+    kill $TUNNEL_PID
+    echo -e "${GREEN}Server và tunnel đã dừng.${NC}"
+}
+
+# Kiểm tra gói ngrok đã được cài đặt chưa
+install_ngrok() {
+    if ! command -v ngrok &> /dev/null; then
+        echo -e "${YELLOW}Đang cài đặt ngrok...${NC}"
+        pkg install -y wget
+        wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-arm.zip
+        unzip ngrok-stable-linux-arm.zip -d $HOME/.bin/
+        chmod +x $HOME/.bin/ngrok
+    fi
 }
 
 # Hàm quản lý tệp và thư mục
