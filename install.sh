@@ -430,7 +430,7 @@ main() {
                 7) view_changelog ;;
                 8) show_usage ;;
                 9) echo -e "${YELLOW}Cảm ơn bạn đã sử dụng TXA VLOG Server Script!${NC}"; exit 0 ;;
-                *) echo -e "${RED}Lựa chọn không hợp lệ. Vui lòng thử lại.${NC}" ;;
+                *) echo -e "${RED}Lựa chọn không hợp lệ. Vui lòng thử lại nào.${NC}" ;;
             esac
         fi
         
