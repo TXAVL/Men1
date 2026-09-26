@@ -76,6 +76,7 @@ verify_key() {
     fi
 
     echo -e "${RED}✗ Key không hợp lệ! Vui lòng thử lại.${NC}"
+    echo -e "${CYAN}👉 Mua Key VIP chính thức tại: ${YELLOW}https://txastudio.click/buy-key${NC}"
     return 1
 }
 
@@ -108,6 +109,15 @@ show_banner() {
 install_packages() {
     show_banner
     echo -e "${BLUE}Đang cập nhật và cài đặt các gói cần thiết...${NC}"
+
+    # Cấp quyền truy cập bộ nhớ ngoài (termux-setup-storage)
+    if [ ! -d "$HOME_DIR/storage" ] && command -v termux-setup-storage &>/dev/null; then
+        echo -e "${YELLOW}Đang yêu cầu cấp quyền truy cập bộ nhớ máy (Storage Permission)...${NC}"
+        echo -e "${CYAN}Vui lòng bấm 'Cho phép' (Allow) trên thông báo pop-up của Android!${NC}"
+        termux-setup-storage 2>/dev/null
+        sleep 2
+    fi
+
     pkg update -y -q || true
     
     local pkgs="nodejs python ffmpeg nmap jq curl git termux-api yt-dlp cloudflared"

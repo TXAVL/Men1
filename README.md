@@ -127,20 +127,23 @@ Khi bạn muốn truy cập Web Hub trên điện thoại từ máy tính hoặc
 
 Để mở khóa toàn bộ các tính năng nâng cao (Nmap, điều khiển phần cứng từ xa, tải media tốc độ cao):
 
-1. **Mua Key Bản Quyền Chính Thức:**
-   - Truy cập trang chủ chính thức: 👉 **[https://txastudio.click](https://txastudio.click)**
-   - Hoặc liên hệ Admin để nhận mã kích hoạt bản quyền VIP.
+1. **Mua Key Bản Quyền Chính Thức (VietQR Tự Động):**
+   - Truy cập cổng mua Key VIP chính thức: 👉 **[https://txastudio.click/buy-key](https://txastudio.click/buy-key)**
+   - Hỗ trợ thanh toán VietQR chuyển khoản ngân hàng tự động, upload biên lai và nhận Key VIP kích hoạt tức thì.
 2. **Nhập Key:**
    - Trong Menu chính, chọn mục **[2] Nhập Key Bản Quyền**.
    - Dán mã key của bạn vào và nhấn Enter. Hệ thống sẽ tự động xác thực và kích hoạt vĩnh viễn trên thiết bị của bạn.
 
 ---
 
-## 📱 Cài Đặt Termux:API Để Kích Hoạt Phần Cứng
+## 📱 Quyền Truy Cập Bộ Nhớ & Termux:API
 
-Để sử dụng các tính năng can thiệp phần cứng (đèn pin, rung, camera, giọng nói tiếng Việt, thông báo):
-1. Tải và cài đặt ứng dụng bổ trợ **[Termux:API (file APK trên F-Droid)](https://f-droid.org/packages/com.termux.api/)**.
-2. Vào Cài đặt điện thoại ➔ Quản lý ứng dụng ➔ **Termux:API** ➔ Cấp quyền: **Camera, Vị trí (Location), Thông báo (Notification)**.
+1. **Cấp Quyền Bộ Nhớ Ngoài (Storage):**
+   - Bộ cài đặt tự động yêu cầu quyền bộ nhớ thông qua `termux-setup-storage`.
+   - Vui lòng bấm **"Cho phép" (Allow)** trên cửa sổ thông báo của Android để script lưu video tải về và ảnh chụp vào bộ nhớ máy (`$HOME/storage/shared`).
+2. **Kích Hoạt Điều Khiển Phần Cứng (Termux:API):**
+   - Tải và cài đặt ứng dụng bổ trợ **[Termux:API (file APK trên F-Droid)](https://f-droid.org/packages/com.termux.api/)**.
+   - Vào Cài đặt điện thoại ➔ Quản lý ứng dụng ➔ **Termux:API** ➔ Cấp quyền: **Camera, Vị trí (Location), Thông báo (Notification)**.
 
 ---
 

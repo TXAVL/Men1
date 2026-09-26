@@ -39,7 +39,17 @@ validate_key() {
 
 mkdir -p "$DOWNLOAD_DIR"
 
+check_storage_permission() {
+    if [ ! -d "$HOME_DIR/storage" ] && command -v termux-setup-storage &>/dev/null; then
+        echo -e "${YELLOW}Đang yêu cầu quyền truy cập bộ nhớ ngoài (Storage)...${NC}"
+        echo -e "${CYAN}Vui lòng bấm 'Cho phép' (Allow) trên thông báo pop-up của Android!${NC}"
+        termux-setup-storage 2>/dev/null
+        sleep 2
+    fi
+}
+
 check_and_install_packages() {
+    check_storage_permission
     for package in $REQUIRED_PACKAGES; do
         if ! command -v $package &> /dev/null; then
             echo -e "${YELLOW}Cài đặt gói thiếu: $package...${NC}"
@@ -164,8 +174,8 @@ is_key_valid() {
 
 input_key() {
     echo -e "${CYAN}--- NHẬP KEY XÁC THỰC BẢN QUYỀN ---${NC}"
-    echo -e "API Máy Chủ: ${YELLOW}$API_URL${NC}"
-    echo -e "Master Key mặc định: ${GREEN}TXA-MASTER-STUDIO-CLICK-2026${NC}"
+    echo -e "Mua Key VIP chính thức tại: ${YELLOW}https://txastudio.click/buy-key${NC}"
+    echo -e "Key trải nghiệm: ${GREEN}TXA-VIP-TXASTUDIO-CLICK${NC}"
     echo
     read -p "Nhập key của bạn: " key
     key=$(echo "$key" | tr -d ' ')
@@ -180,7 +190,7 @@ input_key() {
         echo -e "${GREEN}✓ Key hợp lệ! Đã kích hoạt đầy đủ tính năng.${NC}"
         update_user_info
     else
-        echo -e "${RED}✗ Key không hợp lệ! Vui lòng kiểm tra lại.${NC}"
+        echo -e "${RED}✗ Key không hợp lệ! Vui lòng mua key chính thức tại: https://txastudio.click/buy-key${NC}"
         rm -f "$KEY_FILE"
     fi
 }
@@ -232,7 +242,7 @@ advanced_menu() {
         echo -e "${BLUE}5.${NC} 📸 Chụp ảnh camera ẩn"
         echo -e "${BLUE}6.${NC} 🔍 Quét cổng dịch vụ mạng (Nmap Scan)"
         echo -e "${BLUE}7.${NC} 📥 Tải video/nhạc YouTube, TikTok (yt-dlp)"
-        echo -e "${BLUE}8.${NC} 🌐 Quản lý Key trên Web Admin (txastudio.click/api/admin)"
+        echo -e "${BLUE}8.${NC} 💎 Mua Key VIP & Nâng Cấp Bản Quyền (txastudio.click/buy-key)"
         echo -e "${BLUE}0.${NC} Quay lại"
         echo
         read -p "Chọn [0-8]: " adv_c
@@ -264,8 +274,8 @@ advanced_menu() {
                 [ -n "$vurl" ] && yt-dlp -o "$DOWNLOAD_DIR/%(title).60s.%(ext)s" "$vurl"
                 ;;
             8)
-                echo -e "${CYAN}Trang quản trị admin trên Vercel:${NC} ${YELLOW}https://txastudio.click/api/admin${NC}"
-                termux-open-url "https://txastudio.click/api/admin" 2>/dev/null
+                echo -e "${CYAN}Trang mua Key VIP chính thức:${NC} ${YELLOW}https://txastudio.click/buy-key${NC}"
+                termux-open-url "https://txastudio.click/buy-key" 2>/dev/null
                 ;;
             0) return ;;
         esac
