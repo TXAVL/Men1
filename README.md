@@ -72,19 +72,22 @@
 
 ---
 
-## 🚀 Hướng Dẫn Cài Đặt Trên Termux
+## 🚀 Cài Đặt Nhanh 1-Chạm Trên Termux (Copy & Dán)
 
-Mở ứng dụng Termux trên Android và chạy các lệnh sau:
+Mở ứng dụng Termux và dán một dòng lệnh duy nhất này vào để cài đặt tự động:
 
 ```bash
-# 1. Cập nhật gói và cài đặt git
-pkg update -y && pkg install -y git
+pkg update -y && pkg install -y git && git clone https://github.com/TXAVL/Men1.git ~/Men1 && cd ~/Men1 && chmod +x *.sh && ./install.sh
+```
 
-# 2. Tải bộ công cụ
+---
+
+### Hoặc Cài Đặt Từng Bước (Nếu muốn xem chi tiết):
+
+```bash
+pkg update -y && pkg install -y git
 git clone https://github.com/TXAVL/Men1.git ~/Men1
 cd ~/Men1
-
-# 3. Cấp quyền và chạy cài đặt
 chmod +x *.sh
 ./install.sh
 ```
