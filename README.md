@@ -92,10 +92,9 @@ chmod +x *.sh
 ./install.sh
 ```
 
-> **Mẹo:** Sau khi cài đặt hoàn tất, bạn chỉ cần gõ lệnh sau ở bất kỳ đâu trong Termux để mở Menu:
-> ```bash
-> txa
-> ```
+> **Mẹo:** Sau khi cài đặt hoàn tất, bạn có thể gõ các lệnh tắt sau ở bất kỳ đâu trong Termux:
+> - `txa` : Mở Menu tổng hợp TXA Studio.
+> - `nexhub` : Mở ngay Trung tâm điều khiển đa sắc TXA NexHub (Audit quyền, Web Hub, Tunnel QR Code).
 
 ---
 
@@ -103,23 +102,26 @@ chmod +x *.sh
 
 | Tệp tin | Chức năng & Vai trò |
 |---|---|
-| [install.sh](file:///c:/Users/admin/Desktop/Code/install.sh) | Trình cài đặt tự động 1-chạm: Kiểm tra máy, cài các gói cần thiết, tạo lệnh gọi nhanh `txa`. |
+| [install.sh](file:///c:/Users/admin/Desktop/Code/install.sh) | Trình cài đặt tự động 1-chạm: Kiểm tra máy, cài các gói cần thiết, tạo lệnh gọi nhanh `txa` và `nexhub`. |
+| [nexhub.sh](file:///c:/Users/admin/Desktop/Code/nexhub.sh) | **TXA NexHub (MỚI)**: Console Cyberpunk đa sắc ASCII, kiểm tra toàn bộ quyền Android/Termux, đo Telemetry phần cứng, tích hợp Web Hub + Cloudflare Tunnel + QR Code Terminal. |
 | [menu.sh](file:///c:/Users/admin/Desktop/Code/menu.sh) | **Menu chính nâng cao**: Điều khiển phần cứng Android, chạy Web Hub, kích hoạt Cloudflare Tunnel và quét mạng. |
 | [menu1.sh](file:///c:/Users/admin/Desktop/Code/menu1.sh) | **Menu 1 (Thử nghiệm & Demo riêng)**: Menu độc lập, có cơ chế tự động kiểm tra và tải cập nhật từ GitHub Pages. |
 | [server.js](file:///c:/Users/admin/Desktop/Code/server.js) | Máy chủ Web Hub điều khiển thiết bị chạy trên cổng 2311 của Termux. |
-| [tunnel.sh](file:///c:/Users/admin/Desktop/Code/tunnel.sh) | Công cụ Cloudflare Tunnel giúp đưa Web Hub trên điện thoại ra ngoài Internet. |
+| [tunnel.sh](file:///c:/Users/admin/Desktop/Code/tunnel.sh) | Công cụ Cloudflare Tunnel v3.1: Hỗ trợ Quick Tunnel (không cần token) và Custom Named Tunnel (xác thực token chặt chẽ). |
 
 ---
 
 ## 🌐 Hướng Dẫn Sử Dụng Cloudflare Tunnel Cho Web Hub
 
-Khi bạn muốn truy cập Web Hub trên điện thoại từ máy tính hoặc chia sẻ cho bạn bè:
+Khi bạn muốn truy cập Web Hub trên điện thoại từ máy tính hoặc chia sẻ cho bạn bè ở mọi nơi:
 
-* **Chế độ 1: Quick Tunnel (Dùng ngay lập tức)**
-  - Trong Menu ➔ Chọn mục **Quản lý Cloudflare Tunnel** ➔ Bật **Quick Tunnel**.
-  - Hệ thống sẽ cấp cho bạn một đường link bảo mật có đuôi `https://xxxx.trycloudflare.com` để mở giao diện Web Hub.
-* **Chế độ 2: Tên miền / Subdomain riêng**
-  - Hỗ trợ kết nối với Cloudflare Zero Trust qua Token để gán cố định vào tên miền riêng của bạn.
+* **Chế độ 1: Quick Tunnel (Dùng ngay lập tức - KHÔNG CẦN TOKEN)**
+  - Cơ chế thử nghiệm miễn phí của Cloudflare: Hoàn toàn không cần tài khoản, không cần cấu hình token.
+  - Hệ thống sẽ cấp phát một đường link bảo mật ngẫu nhiên có đuôi `https://xxxx.trycloudflare.com`.
+  - Có thể quét mã QR hiển thị ngay trên màn hình console để điện thoại/máy tính khác mở Web Hub ngay lập tức.
+* **Chế độ 2: Tên miền / Subdomain riêng (*.txastudio.click - BẮT BUỘC TOKEN)**
+  - Yêu cầu lấy Tunnel Token từ Cloudflare Zero Trust (Networks ➔ Tunnels).
+  - Script sẽ xác thực Token trực tiếp với máy chủ Cloudflare trước khi xác nhận thành công (chặn đứng lỗi báo ảo khi chưa có token hoặc token sai).
 
 ---
 
