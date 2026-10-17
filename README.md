@@ -94,6 +94,7 @@ chmod +x *.sh
 
 > **Mẹo:** Sau khi cài đặt hoàn tất, bạn có thể gõ các lệnh tắt sau ở bất kỳ đâu trong Termux:
 > - `txa` : Mở Menu tổng hợp TXA Studio.
+> - `ai` hoặc `jarvis` : **Mở ngay Trợ Lý AI TXA Jarvis** (Điều khiển phần cứng Android qua giọng nói/chat, mở Tunnel toàn cầu có QR Code).
 > - `nexhub` : Mở ngay Trung tâm điều khiển đa sắc TXA NexHub (Audit quyền, Web Hub, Tunnel QR Code).
 
 ---
@@ -102,9 +103,11 @@ chmod +x *.sh
 
 | Tệp tin | Chức năng & Vai trò |
 |---|---|
-| [install.sh](file:///c:/Users/admin/Desktop/Code/install.sh) | Trình cài đặt tự động 1-chạm: Kiểm tra máy, cài các gói cần thiết, tạo lệnh gọi nhanh `txa` và `nexhub`. |
-| [nexhub.sh](file:///c:/Users/admin/Desktop/Code/nexhub.sh) | **TXA NexHub (MỚI)**: Console Cyberpunk đa sắc ASCII, kiểm tra toàn bộ quyền Android/Termux, đo Telemetry phần cứng, tích hợp Web Hub + Cloudflare Tunnel + QR Code Terminal. |
-| [menu.sh](file:///c:/Users/admin/Desktop/Code/menu.sh) | **Menu chính nâng cao**: Điều khiển phần cứng Android, chạy Web Hub, kích hoạt Cloudflare Tunnel và quét mạng. |
+| [ai.sh](file:///c:/Users/admin/Desktop/Code/ai.sh) | **TXA Jarvis AI (MỚI)**: Trợ lý AI điều khiển phần cứng Android qua Termux:API, mở cổng Cloudflare Tunnel toàn cầu có QR Code ASCII. |
+| [ai_server.js](file:///c:/Users/admin/Desktop/Code/ai_server.js) | Máy chủ AI Backend trên cổng 2312: Dual Brain (Offline NLP + Google Gemini API) & Cyber Web UI. |
+| [install.sh](file:///c:/Users/admin/Desktop/Code/install.sh) | Trình cài đặt tự động 1-chạm: Kiểm tra máy, cài các gói cần thiết, tạo lệnh gọi nhanh `txa`, `nexhub`, `ai`. |
+| [nexhub.sh](file:///c:/Users/admin/Desktop/Code/nexhub.sh) | **TXA NexHub**: Console Cyberpunk đa sắc ASCII, kiểm tra toàn bộ quyền Android/Termux, đo Telemetry phần cứng, tích hợp Web Hub + Cloudflare Tunnel + QR Code Terminal. |
+| [menu.sh](file:///c:/Users/admin/Desktop/Code/menu.sh) | **Menu chính nâng cao**: Điều khiển phần cứng Android, trợ lý AI, chạy Web Hub, kích hoạt Cloudflare Tunnel và quét mạng. |
 | [menu1.sh](file:///c:/Users/admin/Desktop/Code/menu1.sh) | **Menu 1 (Thử nghiệm & Demo riêng)**: Menu độc lập, có cơ chế tự động kiểm tra và tải cập nhật từ GitHub Pages. |
 | [server.js](file:///c:/Users/admin/Desktop/Code/server.js) | Máy chủ Web Hub điều khiển thiết bị chạy trên cổng 2311 của Termux. |
 | [tunnel.sh](file:///c:/Users/admin/Desktop/Code/tunnel.sh) | Công cụ Cloudflare Tunnel v3.1: Hỗ trợ Quick Tunnel (không cần token) và Custom Named Tunnel (xác thực token chặt chẽ). |
