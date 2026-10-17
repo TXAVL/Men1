@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "unlockadvancements",
+  "version": "1.0.0",
+  "name": "Unlock All Advancements & Morph Disguise",
+  "description": "Shift+7 mo khoa thanh tuu va Mat Na Hoa Than Disguise Mask",
+  "authors": [
+    "asbyxa"
+  ],
+  "contact": {},
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.example.unlockadvancements.UnlockAdvancementsMod"
+    ]
+  },
+  "mixins": [
+    "unlockadvancements.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.16.0"
+  }
+}
