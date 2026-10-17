@@ -32,7 +32,7 @@ if (!fs.existsSync(MEDIA_DIR)) {
 // Cấu hình mặc định
 let appConfig = {
     geminiApiKey: '',
-    geminiModel: 'gemini-2.5-flash',
+    geminiModel: 'gemini-3.8-pro',
     voiceEnabled: true,
     ttsLang: 'vi-VN',
     aiPersona: 'TXA Cyber Jarvis - Trợ lý AI trung thành, thông minh và dí dỏm, điều khiển thiết bị Android Termux.',
@@ -276,15 +276,50 @@ async function offlineBrainProcess(prompt) {
 // ==============================================================================
 // BỘ NÃO GOOGLE GEMINI (Gọi API chính thức với Function Calling / Action triggers)
 // ==============================================================================
+function fetchGeminiModels(apiKey) {
+    return new Promise((resolve, reject) => {
+        if (!apiKey) return reject(new Error('Chưa cung cấp API Key'));
+        const requestUrl = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey.trim()}`;
+        https.get(requestUrl, { timeout: 15000 }, (res) => {
+            let data = '';
+            res.on('data', chunk => data += chunk);
+            res.on('end', () => {
+                try {
+                    const parsed = JSON.parse(data);
+                    if (parsed.error) {
+                        return reject(new Error(parsed.error.message || 'Lỗi lấy danh sách models'));
+                    }
+                    const rawModels = parsed.models || [];
+                    const filtered = rawModels
+                        .filter(m => !m.supportedGenerationMethods || m.supportedGenerationMethods.includes('generateContent'))
+                        .map(m => ({
+                            id: m.name.replace(/^models\//, ''),
+                            displayName: m.displayName || m.name.replace(/^models\//, ''),
+                            description: m.description || ''
+                        }));
+                    resolve(filtered);
+                } catch (e) {
+                    reject(new Error('Lỗi phản hồi từ Google: ' + e.message));
+                }
+            });
+        }).on('error', (e) => reject(e)).on('timeout', function() {
+            this.destroy();
+            reject(new Error('Timeout kết nối tới Google AI Studio'));
+        });
+    });
+}
+
 function callGeminiApi(prompt, imageBase64 = null) {
     return new Promise((resolve, reject) => {
         if (!appConfig.geminiApiKey) {
             return reject(new Error('Chưa cài đặt Gemini API Key'));
         }
 
-        const model = appConfig.geminiModel || 'gemini-2.5-flash';
+        let rawModel = appConfig.geminiModel || 'gemini-3.8-pro';
+        if (rawModel === '3.8-pro') rawModel = 'gemini-3.8-pro';
+        const modelPath = rawModel.startsWith('models/') ? rawModel : `models/${rawModel}`;
         const apiKey = appConfig.geminiApiKey.trim();
-        const requestUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+        const requestUrl = `https://generativelanguage.googleapis.com/v1beta/${modelPath}:generateContent?key=${apiKey}`;
 
         const parts = [{ text: prompt }];
 
@@ -518,7 +553,32 @@ const server = http.createServer(async (req, res) => {
         return;
     }
 
-    // 4. Cấu hình API
+    // 4. API: Lấy danh sách models từ Google Gemini
+    if (pathname === '/api/models' && req.method === 'GET') {
+        const queryKey = parsedUrl.query.key || appConfig.geminiApiKey;
+        if (!queryKey) {
+            res.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
+            res.end(JSON.stringify({ success: false, error: 'Chưa có API Key để tải models' }));
+            return;
+        }
+
+        try {
+            const models = await fetchGeminiModels(queryKey);
+            res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+            res.end(JSON.stringify({
+                success: true,
+                models,
+                defaultModel: 'gemini-3.8-pro',
+                currentModel: appConfig.geminiModel || 'gemini-3.8-pro'
+            }));
+        } catch (err) {
+            res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
+            res.end(JSON.stringify({ success: false, error: err.message }));
+        }
+        return;
+    }
+
+    // 5. Cấu hình API
     if (pathname === '/api/config' && req.method === 'GET') {
         res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
         res.end(JSON.stringify({
@@ -1066,16 +1126,22 @@ function renderCyberAiHtml() {
             <h3 class="modal-title">⚙️ CẤU HÌNH TRỢ LÝ AI</h3>
             <div class="form-group">
                 <label>Google Gemini API Key (Để mở khóa Siêu Trí Tuệ):</label>
-                <input type="password" id="cfg-key" class="form-control" placeholder="Dán key AI Studio (AIzaSy...)">
-                <small style="color: var(--text-dim); font-size: 0.75rem;">Lấy key miễn phí tại <a href="https://aistudio.google.com" target="_blank" style="color: var(--cyan);">aistudio.google.com</a> (Để trống sẽ dùng Offline Brain).</small>
+                <div style="display: flex; gap: 8px;">
+                    <input type="password" id="cfg-key" class="form-control" placeholder="Dán key AI Studio (AIzaSy...)" oninput="handleKeyInputDebounced()">
+                    <button class="hw-btn" type="button" onclick="loadModelsFromKey()" style="white-space: nowrap; padding: 0 14px;">🔄 Tải Model</button>
+                </div>
+                <small id="key-hint" style="color: var(--text-dim); font-size: 0.75rem;">Lấy key miễn phí tại <a href="https://aistudio.google.com" target="_blank" style="color: var(--cyan);">aistudio.google.com</a> (Để trống sẽ dùng Offline Brain).</small>
             </div>
             <div class="form-group">
-                <label>Model Gemini:</label>
+                <label>Chọn Model Gemini AI (Mặc định: 3.8-pro):</label>
                 <select id="cfg-model" class="form-control">
-                    <option value="gemini-2.5-flash">Gemini 2.5 Flash (Siêu nhanh, thông minh nhất)</option>
-                    <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
-                    <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                    <option value="gemini-3.8-pro" selected>gemini-3.8-pro ★ (Mặc định)</option>
+                    <option value="gemini-2.5-pro">gemini-2.5-pro</option>
+                    <option value="gemini-2.5-flash">gemini-2.5-flash</option>
+                    <option value="gemini-1.5-pro">gemini-1.5-pro</option>
+                    <option value="gemini-1.5-flash">gemini-1.5-flash</option>
                 </select>
+                <div id="model-status" style="font-size: 0.75rem; color: var(--cyan); margin-top: 4px;"></div>
             </div>
             <div class="form-group">
                 <label>Phát giọng nói qua loa điện thoại (Termux TTS):</label>
@@ -1260,6 +1326,72 @@ function renderCyberAiHtml() {
             }
         }
 
+        let keyInputTimer = null;
+        function handleKeyInputDebounced() {
+            clearTimeout(keyInputTimer);
+            keyInputTimer = setTimeout(() => {
+                const k = document.getElementById('cfg-key').value.trim();
+                if (k.length > 15) {
+                    loadModelsFromKey(k);
+                }
+            }, 600);
+        }
+
+        async function loadModelsFromKey(customKey = null) {
+            const keyInput = document.getElementById('cfg-key');
+            const key = customKey || keyInput.value.trim();
+            const statusEl = document.getElementById('model-status');
+            const modelSelect = document.getElementById('cfg-model');
+
+            statusEl.innerHTML = '<span style="color: var(--yellow);">⏳ Đang kết nối Google AI Studio tải danh sách models...</span>';
+
+            try {
+                const fetchUrl = key ? '/api/models?key=' + encodeURIComponent(key) : '/api/models';
+                const res = await fetch(fetchUrl);
+                const d = await res.json();
+
+                if (d.success && d.models && d.models.length > 0) {
+                    const currentSelected = modelSelect.value || d.currentModel || 'gemini-3.8-pro';
+                    modelSelect.innerHTML = '';
+
+                    // Kiểm tra xem trong danh sách từ API có 3.8-pro không
+                    let found38 = false;
+                    d.models.forEach(m => {
+                        if (m.id === 'gemini-3.8-pro' || m.id === '3.8-pro' || m.id.includes('3.8-pro')) found38 = true;
+                    });
+
+                    // Nếu API chưa trả về 3.8-pro thì chủ động thêm làm lựa chọn mặc định hàng đầu
+                    if (!found38) {
+                        const optDefault = document.createElement('option');
+                        optDefault.value = 'gemini-3.8-pro';
+                        optDefault.innerText = 'gemini-3.8-pro ★ (Mặc định - Ưu tiên)';
+                        modelSelect.appendChild(optDefault);
+                    }
+
+                    d.models.forEach(m => {
+                        const opt = document.createElement('option');
+                        opt.value = m.id;
+                        const isDefault = (m.id === 'gemini-3.8-pro' || m.id === '3.8-pro');
+                        opt.innerText = m.displayName + (isDefault ? ' ★ (Mặc định)' : '');
+                        modelSelect.appendChild(opt);
+                    });
+
+                    // Ưu tiên chọn 3.8-pro nếu chưa chọn model khác
+                    if (currentSelected && [...modelSelect.options].some(o => o.value === currentSelected)) {
+                        modelSelect.value = currentSelected;
+                    } else {
+                        modelSelect.value = 'gemini-3.8-pro';
+                    }
+
+                    statusEl.innerHTML = '<span style="color: var(--green);">✓ Đã tải ' + d.models.length + ' models! Đang chọn: <b>' + modelSelect.value + '</b></span>';
+                } else {
+                    statusEl.innerHTML = '<span style="color: var(--magenta);">⚠️ ' + (d.error || 'Không tải được danh sách model') + '</span>';
+                }
+            } catch (err) {
+                statusEl.innerHTML = '<span style="color: var(--magenta);">⚠️ Lỗi kết nối: ' + err.message + '</span>';
+            }
+        }
+
         async function loadConfigToModal() {
             try {
                 const res = await fetch('/api/config');
@@ -1267,6 +1399,10 @@ function renderCyberAiHtml() {
                 if (d.maskedKey) document.getElementById('cfg-key').placeholder = d.maskedKey;
                 if (d.geminiModel) document.getElementById('cfg-model').value = d.geminiModel;
                 document.getElementById('cfg-voice').value = d.voiceEnabled ? 'true' : 'false';
+
+                if (d.hasKey) {
+                    loadModelsFromKey();
+                }
             } catch (e) {}
         }
 

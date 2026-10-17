@@ -294,18 +294,63 @@ config_gemini() {
     read -p "Nhập Google Gemini API Key (Enter để bỏ qua/xóa): " input_key
 
     mkdir -p "$HOME_DIR"
-    local current_model="gemini-2.5-flash"
+    local selected_model="gemini-3.8-pro"
     local voice_state="true"
 
     if [ -f "$CONFIG_FILE" ]; then
-        current_model=$(jq -r '.geminiModel // "gemini-2.5-flash"' "$CONFIG_FILE" 2>/dev/null || echo "gemini-2.5-flash")
         voice_state=$(jq -r '.voiceEnabled // true' "$CONFIG_FILE" 2>/dev/null || echo "true")
+    fi
+
+    if [ -n "$input_key" ]; then
+        echo
+        echo -e "${YELLOW}⏳ Đang kết nối Google AI Studio để tải danh sách Model khả dụng...${NC}"
+        local api_res=$(curl -s -m 12 "https://generativelanguage.googleapis.com/v1beta/models?key=$input_key")
+
+        if echo "$api_res" | jq -e '.models' >/dev/null 2>&1; then
+            echo -e "${GREEN}✓ Đã tải danh sách Model thành công từ Google AI!${NC}"
+            echo -e "${CYAN}Các model tiêu biểu tìm thấy:${NC}"
+
+            # Lọc danh sách model hỗ trợ generateContent
+            local model_list=($(echo "$api_res" | jq -r '.models[] | select(.supportedGenerationMethods[]? == "generateContent") | .name' | sed 's|^models/||'))
+            
+            # Đảm bảo gemini-3.8-pro luôn là lựa chọn đầu tiên / mặc định
+            echo -e "  ${BOLD}${YELLOW}[0] gemini-3.8-pro ★ (Mặc định - Khuyên dùng)${NC}"
+
+            local idx=1
+            for m in "${model_list[@]}"; do
+                if [[ "$m" != "gemini-3.8-pro" && "$m" != "3.8-pro" ]]; then
+                    echo -e "  [${idx}] $m"
+                    idx=$((idx + 1))
+                fi
+                [ $idx -gt 15 ] && break # Hiển thị tối đa 15 models
+            done
+
+            echo
+            read -p "Chọn số thứ tự model hoặc nhập tên model [Mặc định: 0 - gemini-3.8-pro]: " model_choice
+
+            if [[ -z "$model_choice" || "$model_choice" == "0" || "$model_choice" == "3.8-pro" ]]; then
+                selected_model="gemini-3.8-pro"
+            elif [[ "$model_choice" =~ ^[0-9]+$ ]] && [ "$model_choice" -lt "$idx" ]; then
+                local chosen_idx=$((model_choice - 1))
+                local filtered_list=()
+                for m in "${model_list[@]}"; do
+                    [[ "$m" != "gemini-3.8-pro" && "$m" != "3.8-pro" ]] && filtered_list+=("$m")
+                done
+                selected_model="${filtered_list[$chosen_idx]:-gemini-3.8-pro}"
+            else
+                selected_model="$model_choice"
+            fi
+            echo -e "${GREEN}✓ Đã chọn Model: ${BOLD}${selected_model}${NC}"
+        else
+            echo -e "${YELLOW}⚠️ Không tải được danh sách động (hoặc key mới tạo). Áp dụng model mặc định: ${BOLD}gemini-3.8-pro${NC}"
+            selected_model="gemini-3.8-pro"
+        fi
     fi
 
     cat <<EOF > "$CONFIG_FILE"
 {
   "geminiApiKey": "$input_key",
-  "geminiModel": "$current_model",
+  "geminiModel": "$selected_model",
   "voiceEnabled": $voice_state,
   "ttsLang": "vi-VN"
 }
@@ -313,9 +358,9 @@ EOF
 
     echo
     if [ -n "$input_key" ]; then
-        echo -e "${GREEN}✓ Đã lưu Gemini API Key! Jarvis hiện đã được kích hoạt Siêu Trí Tuệ!${NC}"
+        echo -e "${GREEN}✓ Đã lưu Gemini API Key & Model [${selected_model}]! Siêu Trí Tuệ đã sẵn sàng!${NC}"
     else
-        echo -e "${YELLOW}✓ Đã cấu hình chạy ở chế độ Offline NLP Brain!${NC}"
+        echo -e "${YELLOW}✓ Đã chuyển về chế độ Offline NLP Brain!${NC}"
     fi
     sleep 2
 }
